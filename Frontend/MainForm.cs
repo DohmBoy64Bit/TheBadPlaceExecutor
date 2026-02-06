@@ -20,6 +20,12 @@ public partial class MainForm : Form
     private Label statusDot;
     private Label statusText;
     private System.Windows.Forms.Timer statusTimer;
+
+    // Theme Colors
+    private readonly Color BorderColor = Color.FromArgb(60, 60, 60);
+    private readonly Color ActiveTabColor = Color.FromArgb(45, 45, 45);
+    private readonly Color InactiveTabColor = Color.FromArgb(30, 30, 30);
+    private readonly Color TextColor = Color.White;
     
     // Autocomplete support
     private ApiParser apiParser = new ApiParser();
@@ -70,22 +76,19 @@ public partial class MainForm : Form
     private void SetupStatusTimer()
     {
         statusTimer = new System.Windows.Forms.Timer();
-        statusTimer.Interval = 2000; // Check every 2 seconds
+        statusTimer.Interval = 1000; // Check every second
         statusTimer.Tick += (s, e) => {
             bool isConnected = false;
             try {
                 // Check if pipe exists without full connect
-                string pipePath = @"\\.\pipe\TheBadPlace_Executor_Pipe";
-                if (System.IO.File.Exists(pipePath)) {
-                    isConnected = true;
-                }
+                isConnected = System.IO.Directory.GetFiles(@"\\.\pipe\").Contains(@"\\.\pipe\TheBadPlace_Executor_Pipe");
             } catch { }
 
             if (isConnected) {
-                statusDot.ForeColor = Color.Green;
+                statusDot.ForeColor = Color.LimeGreen;
                 statusText.Text = "ATTACHED";
             } else {
-                statusDot.ForeColor = Color.Red;
+                statusDot.ForeColor = Color.OrangeRed;
                 statusText.Text = "NOT ATTACHED";
             }
         };
@@ -245,32 +248,78 @@ public partial class MainForm : Form
             Padding = new Padding(5)
         };
 
+        Panel editorBorder = new Panel {
+            Dock = DockStyle.Fill,
+            BackColor = BorderColor,
+            Padding = new Padding(1)
+        };
+
         editorTabs = new TabControl {
             Dock = DockStyle.Fill,
             Appearance = TabAppearance.Normal,
-            Padding = new Point(10, 3)
+            Padding = new Point(12, 3),
+            DrawMode = TabDrawMode.OwnerDrawFixed
         };
+        editorTabs.DrawItem += (s, e) => {
+            var tabRect = editorTabs.GetTabRect(e.Index);
+            bool isSelected = editorTabs.SelectedIndex == e.Index;
+            
+            using (var brush = new SolidBrush(isSelected ? ActiveTabColor : InactiveTabColor)) {
+                e.Graphics.FillRectangle(brush, tabRect);
+            }
+
+            TextRenderer.DrawText(e.Graphics, editorTabs.TabPages[e.Index].Text, editorTabs.Font, 
+                new Point(tabRect.X + 5, tabRect.Y + 4), TextColor);
+
+            // Draw X to close
+            TextRenderer.DrawText(e.Graphics, "x", editorTabs.Font, 
+                new Point(tabRect.Right - 15, tabRect.Y + 3), Color.Gray);
+        };
+        editorTabs.MouseDown += (s, e) => {
+            for (int i = 0; i < editorTabs.TabPages.Count; i++) {
+                var tabRect = editorTabs.GetTabRect(i);
+                var closeRect = new Rectangle(tabRect.Right - 20, tabRect.Y, 20, tabRect.Height);
+                if (closeRect.Contains(e.Location)) {
+                    if (editorTabs.TabPages.Count > 1) {
+                        editorTabs.TabPages.RemoveAt(i);
+                    }
+                    break;
+                }
+            }
+        };
+        
         // Add initial tab
         CreateNewTab("Script 1");
+
+        editorBorder.Controls.Add(editorTabs);
 
         scriptList = new ListBox {
             Dock = DockStyle.Right,
             Width = 150,
             BackColor = Color.FromArgb(30, 30, 30),
             ForeColor = Color.White,
-            BorderStyle = BorderStyle.FixedSingle,
+            BorderStyle = BorderStyle.None,
             Font = new Font("Segoe UI", 9)
         };
 
-        mainContent.Controls.Add(editorTabs);
-        mainContent.Controls.Add(scriptList);
+        Panel scriptListBorder = new Panel {
+            Dock = DockStyle.Right,
+            Width = 152,
+            BackColor = BorderColor,
+            Padding = new Padding(1)
+        };
+        scriptListBorder.Controls.Add(scriptList);
+
+        mainContent.Controls.Add(editorBorder);
+        mainContent.Controls.Add(scriptListBorder);
 
         // Button Panel
         buttonPanel = new FlowLayoutPanel {
             Dock = DockStyle.Bottom,
-            Height = 40,
-            Padding = new Padding(5),
-            BackColor = Color.FromArgb(45, 45, 45)
+            Height = 35,
+            Padding = new Padding(2),
+            BackColor = Color.FromArgb(45, 45, 45),
+            WrapContents = false
         };
 
         statusDot = new Label {
@@ -311,13 +360,15 @@ public partial class MainForm : Form
     {
         var btn = new Button {
             Text = text,
-            Size = new Size(100, 30),
+            Size = new Size(90, 28),
             FlatStyle = FlatStyle.Flat,
             BackColor = Color.FromArgb(60, 60, 60),
             ForeColor = Color.White,
-            Font = new Font("Segoe UI", 8)
+            Font = new Font("Segoe UI", 8),
+            Margin = new Padding(2, 4, 2, 4)
         };
-        btn.FlatAppearance.BorderSize = 0;
+        btn.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
+        btn.FlatAppearance.BorderSize = 1;
         return btn;
     }
 
