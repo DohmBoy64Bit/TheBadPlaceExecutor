@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using Frontend.IPC;
 using Frontend.Utils;
+using Frontend.Scripting;
 
 namespace Frontend;
 
@@ -13,13 +14,16 @@ public partial class MainForm : Form
     private Label titleLabel;
     private Button closeButton;
     private Button minimizeButton;
-    private WebView2 editorView;
     private ListBox scriptList;
     private FlowLayoutPanel buttonPanel;
     private TabControl editorTabs;
     private Label statusDot;
     private Label statusText;
     private System.Windows.Forms.Timer statusTimer;
+    
+    // Autocomplete support
+    private ApiParser apiParser = new ApiParser();
+    private string? cachedCompletionsJs;
     
     // Synapse X style buttons
     private Button executeBtn;
@@ -41,12 +45,25 @@ public partial class MainForm : Form
     public MainForm()
     {
         EnvironmentUtils.InitializeFolders();
+        InitializeAutocomplete();
         InitializeComponent();
         SetupStyles();
         SetupEvents();
         LoadScripts();
         SetupFileSystemWatcher();
         SetupStatusTimer();
+    }
+
+    private void InitializeAutocomplete()
+    {
+        string xmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ReflectionData.xml");
+        if (File.Exists(xmlPath))
+        {
+            if (apiParser.LoadFromFile(xmlPath))
+            {
+                cachedCompletionsJs = AutocompleteGenerator.GeneratePolytoriaCompletions(apiParser);
+            }
+        }
     }
 
     private void SetupStatusTimer()
