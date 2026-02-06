@@ -10,7 +10,8 @@
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
-        Background="#2D2D2D">
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent">
 
     <Window.Styles>
         <!-- Modern Button Style -->
@@ -44,7 +45,7 @@
 
     <Panel>
         <!-- Background -->
-        <Border Background="#2D2D2D"/>
+        <Border Background="#BF1E1E1E"/>
 
         <DockPanel Margin="1">
             <!-- Custom Title Bar -->
