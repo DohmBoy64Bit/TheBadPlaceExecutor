@@ -251,14 +251,21 @@ public partial class MainForm : Form
         Panel editorBorder = new Panel {
             Dock = DockStyle.Fill,
             BackColor = BorderColor,
-            Padding = new Padding(1)
+            Padding = new Padding(2)
         };
 
         editorTabs = new TabControl {
             Dock = DockStyle.Fill,
             Appearance = TabAppearance.Normal,
             Padding = new Point(12, 3),
-            DrawMode = TabDrawMode.OwnerDrawFixed
+            DrawMode = TabDrawMode.OwnerDrawFixed,
+            BackColor = InactiveTabColor
+        };
+        editorTabs.Paint += (s, e) => {
+            // Fill the area behind the tabs
+            using (var brush = new SolidBrush(InactiveTabColor)) {
+                e.Graphics.FillRectangle(brush, editorTabs.ClientRectangle);
+            }
         };
         editorTabs.DrawItem += (s, e) => {
             var tabRect = editorTabs.GetTabRect(e.Index);
@@ -268,12 +275,19 @@ public partial class MainForm : Form
                 e.Graphics.FillRectangle(brush, tabRect);
             }
 
+            // Draw border for the tab itself
+            using (var pen = new Pen(BorderColor)) {
+                e.Graphics.DrawRectangle(pen, tabRect);
+            }
+
             TextRenderer.DrawText(e.Graphics, editorTabs.TabPages[e.Index].Text, editorTabs.Font, 
-                new Point(tabRect.X + 5, tabRect.Y + 4), TextColor);
+                new Point(tabRect.X + 8, tabRect.Y + 6), TextColor);
 
             // Draw X to close
-            TextRenderer.DrawText(e.Graphics, "x", editorTabs.Font, 
-                new Point(tabRect.Right - 15, tabRect.Y + 3), Color.Gray);
+            if (editorTabs.TabPages.Count > 1) {
+                TextRenderer.DrawText(e.Graphics, "x", editorTabs.Font, 
+                    new Point(tabRect.Right - 15, tabRect.Y + 5), Color.Gray);
+            }
         };
         editorTabs.MouseDown += (s, e) => {
             for (int i = 0; i < editorTabs.TabPages.Count; i++) {
@@ -380,6 +394,7 @@ public partial class MainForm : Form
     private WebView2 CreateNewTab(string title)
     {
         TabPage page = new TabPage(title);
+        page.BackColor = InactiveTabColor;
         WebView2 webView = new WebView2 {
             Dock = DockStyle.Fill,
             BackColor = Color.FromArgb(30, 30, 30)
