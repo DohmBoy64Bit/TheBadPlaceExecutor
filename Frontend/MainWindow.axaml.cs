@@ -131,9 +131,6 @@ public partial class MainWindow : Window
             try {
                 string script = await GetEditorText();
                 if (!string.IsNullOrEmpty(script)) {
-                    if (script.StartsWith("\"") && script.EndsWith("\"")) {
-                        script = JsonSerializer.Deserialize<string>(script) ?? script;
-                    }
                     await PipeClient.SendScript(script);
                 }
             } catch { }
@@ -195,7 +192,8 @@ public partial class MainWindow : Window
     {
         try {
             if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                return await Task.Run(() => webView.EvaluateScript<string>("editor.getValue();"));
+                // EvaluateScript in WebViewControl.Avalonia returns Task<T> and should be called on UI thread
+                return await webView.EvaluateScript<string>("editor.getValue();");
             }
         } catch { }
         return "";
