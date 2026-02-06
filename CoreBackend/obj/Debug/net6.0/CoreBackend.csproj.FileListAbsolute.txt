@@ -1,5 +1,0 @@
-C:\Users\SeanS\.zenflow\worktrees\flesh-out-686a\CoreBackend\obj\Debug\net6.0\CoreBackend.csproj.AssemblyReference.cache
-C:\Users\SeanS\.zenflow\worktrees\flesh-out-686a\CoreBackend\obj\Debug\net6.0\CoreBackend.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\SeanS\.zenflow\worktrees\flesh-out-686a\CoreBackend\obj\Debug\net6.0\CoreBackend.AssemblyInfoInputs.cache
-C:\Users\SeanS\.zenflow\worktrees\flesh-out-686a\CoreBackend\obj\Debug\net6.0\CoreBackend.AssemblyInfo.cs
-C:\Users\SeanS\.zenflow\worktrees\flesh-out-686a\CoreBackend\obj\Debug\net6.0\CoreBackend.csproj.CoreCompileInputs.cache

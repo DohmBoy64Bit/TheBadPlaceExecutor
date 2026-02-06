@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>..\..\..\..\AppData\Roaming\Polytoria\Client\1.4.151\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+    </Reference>
     <Reference Include="MelonLoader">
       <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\MelonLoader.dll</HintPath>
     </Reference>
@@ -26,9 +29,6 @@
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppMoonSharp.Interpreter">
-      <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\Il2CppMoonSharp.Interpreter.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppInterop.Runtime">
       <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\Il2CppInterop.Runtime.dll</HintPath>
