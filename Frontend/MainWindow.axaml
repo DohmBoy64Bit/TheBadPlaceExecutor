@@ -10,13 +10,12 @@
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
-        TransparencyLevelHint="AcrylicBlur"
-        Background="Transparent">
+        Background="#2D2D2D">
 
     <Window.Styles>
         <!-- Modern Button Style -->
         <Style Selector="Button.executor">
-            <Setter Property="Background" Value="#AA3C3C3C"/>
+            <Setter Property="Background" Value="#3C3C3C"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#505050"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -30,7 +29,7 @@
             </Setter>
         </Style>
         <Style Selector="Button.executor:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#DD4A4A4A"/>
+            <Setter Property="Background" Value="#4A4A4A"/>
             <Setter Property="RenderTransform" Value="scale(1.05)"/>
         </Style>
         
@@ -44,20 +43,12 @@
     </Window.Styles>
 
     <Panel>
-        <!-- Experimental Acrylic Background -->
-        <ExperimentalAcrylicBorder IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    BackgroundSource="Digger"
-                    TintColor="Black"
-                    TintOpacity="0.8"
-                    MaterialOpacity="0.65" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
+        <!-- Background -->
+        <Border Background="#2D2D2D"/>
 
         <DockPanel Margin="1">
             <!-- Custom Title Bar -->
-            <Border DockPanel.Dock="Top" Height="32" Background="#44000000">
+            <Border DockPanel.Dock="Top" Height="32" Background="#1A1A1A">
                 <Grid>
                     <TextBlock Text="THE BAD PLACE EXECUTOR" 
                                Foreground="#CCFFFFFF" 
@@ -71,7 +62,7 @@
             </Border>
 
             <!-- Bottom Panel -->
-            <Border DockPanel.Dock="Bottom" Height="45" Background="#22000000" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0">
+            <Border DockPanel.Dock="Bottom" Height="45" Background="#252525" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0">
                 <StackPanel Orientation="Horizontal" Margin="10,0" Spacing="8">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0" Spacing="8">
                         <Ellipse Name="StatusDot" Width="8" Height="8" Fill="#FF4444"/>
@@ -94,8 +85,8 @@
                     <ColumnDefinition Width="160"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Glassy Editor Container -->
-                <Border CornerRadius="4" Background="#33000000" BorderBrush="#44FFFFFF" BorderThickness="1" ClipToBounds="True">
+                <!-- Editor Container -->
+                <Border CornerRadius="4" Background="#1E1E1E" BorderBrush="#44FFFFFF" BorderThickness="1" ClipToBounds="True">
                     <TabControl Name="EditorTabs" Background="Transparent" x:CompileBindings="False">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
@@ -108,7 +99,7 @@
                 </Border>
 
                 <!-- Sidebar -->
-                <Border Grid.Column="1" Margin="8,0,0,0" CornerRadius="4" Background="#33000000" BorderBrush="#44FFFFFF" BorderThickness="1">
+                <Border Grid.Column="1" Margin="8,0,0,0" CornerRadius="4" Background="#1E1E1E" BorderBrush="#44FFFFFF" BorderThickness="1">
                     <ListBox Name="ScriptList" Background="Transparent" Foreground="#DDFFFFFF" BorderThickness="0">
                         <ListBox.Styles>
                             <Style Selector="ListBoxItem">
