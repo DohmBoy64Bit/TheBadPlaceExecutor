@@ -10,74 +10,115 @@
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
-        Background="#2D2D2D">
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent">
 
     <Window.Styles>
+        <!-- Modern Button Style -->
         <Style Selector="Button.executor">
-            <Setter Property="Background" Value="#3C3C3C"/>
+            <Setter Property="Background" Value="#AA3C3C3C"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#505050"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="10,5"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
+                </Transitions>
+            </Setter>
         </Style>
         <Style Selector="Button.executor:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#4A4A4A"/>
+            <Setter Property="Background" Value="#DD4A4A4A"/>
+            <Setter Property="RenderTransform" Value="scale(1.05)"/>
+        </Style>
+        
+        <!-- Tab Control Modernization -->
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="10,0"/>
         </Style>
     </Window.Styles>
 
-    <DockPanel>
-        <!-- Title Bar -->
-        <Border DockPanel.Dock="Top" Height="30" Background="#3C3C3C">
-            <TextBlock Text="THE BAD PLACE EXECUTOR" 
-                       Foreground="White" 
-                       VerticalAlignment="Center" 
-                       Margin="10,0" 
-                       FontWeight="Bold" 
-                       FontSize="12"
-                       IsHitTestVisible="False"/>
-        </Border>
+    <Panel>
+        <!-- Experimental Acrylic Background -->
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="0.8"
+                    MaterialOpacity="0.65" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
 
-        <!-- Bottom Panel -->
-        <Border DockPanel.Dock="Bottom" Height="40" Background="#2D2D2D" BorderBrush="#232323" BorderThickness="0,1,0,0">
-            <StackPanel Orientation="Horizontal" Margin="5,0" Spacing="5">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,10,0" Spacing="5">
-                    <Ellipse Name="StatusDot" Width="10" Height="10" Fill="Red"/>
-                    <TextBlock Name="StatusText" Text="NOT ATTACHED" Foreground="White" VerticalAlignment="Center" FontSize="11" FontWeight="Bold"/>
+        <DockPanel Margin="1">
+            <!-- Custom Title Bar -->
+            <Border DockPanel.Dock="Top" Height="32" Background="#44000000">
+                <Grid>
+                    <TextBlock Text="THE BAD PLACE EXECUTOR" 
+                               Foreground="#CCFFFFFF" 
+                               VerticalAlignment="Center" 
+                               Margin="12,0" 
+                               FontWeight="Bold" 
+                               FontSize="11"
+                               LetterSpacing="1"
+                               IsHitTestVisible="False"/>
+                </Grid>
+            </Border>
+
+            <!-- Bottom Panel -->
+            <Border DockPanel.Dock="Bottom" Height="45" Background="#22000000" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0">
+                <StackPanel Orientation="Horizontal" Margin="10,0" Spacing="8">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0" Spacing="8">
+                        <Ellipse Name="StatusDot" Width="8" Height="8" Fill="#FF4444"/>
+                        <TextBlock Name="StatusText" Text="NOT ATTACHED" Foreground="#AAFFFFFF" VerticalAlignment="Center" FontSize="10" FontWeight="Bold" LetterSpacing="0.5"/>
+                    </StackPanel>
+                    
+                    <Button Name="ExecuteBtn" Content="Execute" Classes="executor"/>
+                    <Button Name="ClearBtn" Content="Clear" Classes="executor"/>
+                    <Button Name="OpenFileBtn" Content="Open File" Classes="executor"/>
+                    <Button Name="SaveFileBtn" Content="Save File" Classes="executor"/>
+                    <Button Name="OptionsBtn" Content="+" Classes="executor" Width="32"/>
+                    <Button Name="ScriptHubBtn" Content="Script Hub" Classes="executor"/>
                 </StackPanel>
-                
-                <Button Name="ExecuteBtn" Content="Execute" Classes="executor"/>
-                <Button Name="ClearBtn" Content="Clear" Classes="executor"/>
-                <Button Name="OpenFileBtn" Content="Open File" Classes="executor"/>
-                <Button Name="SaveFileBtn" Content="Save File" Classes="executor"/>
-                <Button Name="OptionsBtn" Content="+" Classes="executor" Width="30"/>
-                <Button Name="ScriptHubBtn" Content="Script Hub" Classes="executor"/>
-            </StackPanel>
-        </Border>
-
-        <!-- Main Content -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="150"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Editor Section -->
-            <Border Margin="5" Background="#232323" BorderBrush="#232323" BorderThickness="1">
-                <TabControl Name="EditorTabs" Background="Transparent" x:CompileBindings="False">
-                    <TabControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Header}"/>
-                        </DataTemplate>
-                    </TabControl.ItemTemplate>
-                </TabControl>
             </Border>
 
-            <!-- Sidebar -->
-            <Border Grid.Column="1" Margin="0,5,5,5" Background="#232323" BorderBrush="#232323" BorderThickness="1">
-                <ListBox Name="ScriptList" Background="#1E1E1E" Foreground="White" BorderThickness="0">
-                </ListBox>
-            </Border>
-        </Grid>
-    </DockPanel>
+            <!-- Main Workspace -->
+            <Grid Margin="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="160"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Glassy Editor Container -->
+                <Border CornerRadius="4" Background="#33000000" BorderBrush="#44FFFFFF" BorderThickness="1" ClipToBounds="True">
+                    <TabControl Name="EditorTabs" Background="Transparent" x:CompileBindings="False">
+                        <TabControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Header}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </TabControl.ItemTemplate>
+                    </TabControl>
+                </Border>
+
+                <!-- Sidebar -->
+                <Border Grid.Column="1" Margin="8,0,0,0" CornerRadius="4" Background="#33000000" BorderBrush="#44FFFFFF" BorderThickness="1">
+                    <ListBox Name="ScriptList" Background="Transparent" Foreground="#DDFFFFFF" BorderThickness="0">
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="8,4"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Style>
+                        </ListBox.Styles>
+                    </ListBox>
+                </Border>
+            </Grid>
+        </DockPanel>
+    </Panel>
 </Window>
