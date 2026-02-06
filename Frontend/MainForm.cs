@@ -10,17 +10,6 @@ namespace Frontend;
 
 public partial class MainForm : Form
 {
-    private Panel titleBar;
-    private Label titleLabel;
-    private Button closeButton;
-    private Button minimizeButton;
-    private ListBox scriptList;
-    private FlowLayoutPanel buttonPanel;
-    private TabControl editorTabs;
-    private Label statusDot;
-    private Label statusText;
-    private System.Windows.Forms.Timer statusTimer;
-
     // Theme Colors
     private readonly Color BorderColor = Color.FromArgb(35, 35, 35);
     private readonly Color ActiveTabColor = Color.FromArgb(45, 45, 45);
@@ -32,13 +21,7 @@ public partial class MainForm : Form
     private string? cachedCompletionsJs;
     private string? cachedHighlightConfigJson;
     
-    // Synapse X style buttons
-    private Button executeBtn;
-    private Button clearBtn;
-    private Button openFileBtn;
-    private Button saveFileBtn;
-    private Button optionsBtn;
-    private Button scriptHubBtn;
+    private System.Windows.Forms.Timer statusTimer;
 
     // Draggable window support
     [DllImport("user32.dll")]
@@ -53,7 +36,7 @@ public partial class MainForm : Form
         EnvironmentUtils.InitializeFolders();
         InitializeAutocomplete();
         InitializeComponent();
-        SetupStyles();
+        SetupCustomUI();
         SetupEvents();
         LoadScripts();
         SetupFileSystemWatcher();
@@ -80,7 +63,6 @@ public partial class MainForm : Form
         statusTimer.Tick += (s, e) => {
             bool isConnected = false;
             try {
-                // Check if pipe exists without full connect
                 isConnected = System.IO.Directory.GetFiles(@"\\.\pipe\").Contains(@"\\.\pipe\TheBadPlace_Executor_Pipe");
             } catch { }
 
@@ -117,12 +99,70 @@ public partial class MainForm : Form
         }
     }
 
+    private void SetupCustomUI()
+    {
+        // Custom Drag Support for Title Bar
+        titleBar.MouseDown += (s, e) => {
+            if (e.Button == MouseButtons.Left) {
+                ReleaseCapture();
+                SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
+        };
+
+        // Custom Tab Rendering
+        editorTabs.Paint += (s, e) => {
+            e.Graphics.Clear(InactiveTabColor);
+            using (var pen = new Pen(BorderColor, 1)) {
+                e.Graphics.DrawRectangle(pen, 0, 0, editorTabs.Width - 1, editorTabs.Height - 1);
+            }
+        };
+
+        editorTabs.DrawItem += (s, e) => {
+            var tabRect = editorTabs.GetTabRect(e.Index);
+            bool isSelected = editorTabs.SelectedIndex == e.Index;
+            
+            using (var brush = new SolidBrush(isSelected ? ActiveTabColor : InactiveTabColor)) {
+                e.Graphics.FillRectangle(brush, tabRect);
+            }
+
+            using (var pen = new Pen(BorderColor)) {
+                e.Graphics.DrawRectangle(pen, tabRect);
+            }
+
+            TextRenderer.DrawText(e.Graphics, editorTabs.TabPages[e.Index].Text, editorTabs.Font, 
+                new Point(tabRect.X + 8, tabRect.Y + 6), TextColor);
+
+            if (editorTabs.TabPages.Count > 1) {
+                TextRenderer.DrawText(e.Graphics, "x", editorTabs.Font, 
+                    new Point(tabRect.Right - 15, tabRect.Y + 5), Color.Gray);
+            }
+        };
+
+        editorTabs.MouseDown += (s, e) => {
+            for (int i = 0; i < editorTabs.TabPages.Count; i++) {
+                var tabRect = editorTabs.GetTabRect(i);
+                var closeRect = new Rectangle(tabRect.Right - 20, tabRect.Y, 20, tabRect.Height);
+                if (closeRect.Contains(e.Location)) {
+                    if (editorTabs.TabPages.Count > 1) {
+                        editorTabs.TabPages.RemoveAt(i);
+                    }
+                    break;
+                }
+            }
+        };
+
+        // Initial Tab
+        CreateNewTab("Script 1");
+    }
+
     private void SetupEvents()
     {
+        closeButton.Click += (s, e) => Application.Exit();
+        minimizeButton.Click += (s, e) => this.WindowState = FormWindowState.Minimized;
+
         executeBtn.Click += async (s, e) => {
             string script = await GetEditorText();
             if (!string.IsNullOrEmpty(script)) {
-                // Remove quotes from ExecuteScriptAsync result if present
                 if (script.StartsWith("\"") && script.EndsWith("\"")) {
                     script = JsonSerializer.Deserialize<string>(script) ?? script;
                 }
@@ -130,9 +170,7 @@ public partial class MainForm : Form
             }
         };
 
-        clearBtn.Click += (s, e) => {
-            SetEditorText("");
-        };
+        clearBtn.Click += (s, e) => SetEditorText("");
 
         scriptList.SelectedIndexChanged += async (s, e) => {
             if (scriptList.SelectedItem != null) {
@@ -140,9 +178,6 @@ public partial class MainForm : Form
                 string filePath = Path.Combine(EnvironmentUtils.ScriptsPath, fileName);
                 if (File.Exists(filePath)) {
                     string content = File.ReadAllText(filePath);
-                    
-                    // If current tab is not empty and not matching this file, maybe open new tab?
-                    // For now, just load into current tab and rename tab
                     if (editorTabs.SelectedTab != null) {
                         editorTabs.SelectedTab.Text = fileName;
                         SetEditorText(content);
@@ -151,11 +186,7 @@ public partial class MainForm : Form
             }
         };
 
-        optionsBtn.Text = "+";
-        optionsBtn.Size = new Size(30, 30);
-        optionsBtn.Click += (s, e) => {
-            CreateNewTab("Script " + (editorTabs.TabPages.Count + 1));
-        };
+        optionsBtn.Click += (s, e) => CreateNewTab("Script " + (editorTabs.TabPages.Count + 1));
 
         openFileBtn.Click += (s, e) => {
             using (OpenFileDialog ofd = new OpenFileDialog()) {
@@ -174,7 +205,6 @@ public partial class MainForm : Form
                 sfd.Filter = "Lua files (*.lua)|*.lua|Text files (*.txt)|*.txt|All files (*.*)|*.*";
                 if (sfd.ShowDialog() == DialogResult.OK) {
                     string content = await GetEditorText();
-                    // Clean up potential JSON quotes from Monaco return
                     if (content.StartsWith("\"") && content.EndsWith("\"")) {
                         content = JsonSerializer.Deserialize<string>(content) ?? content;
                     }
@@ -184,212 +214,28 @@ public partial class MainForm : Form
         };
     }
 
-    private void InitializeComponent()
+    private async Task<string> GetEditorText()
     {
-        this.SuspendLayout();
-        
-        // Form properties
-        this.Size = new Size(800, 450);
-        this.FormBorderStyle = FormBorderStyle.None;
-        this.BackColor = Color.FromArgb(45, 45, 45);
-        this.StartPosition = FormStartPosition.CenterScreen;
-        this.Text = "The Bad Place Executor";
-
-        // Title Bar
-        titleBar = new Panel {
-            Dock = DockStyle.Top,
-            Height = 30,
-            BackColor = Color.FromArgb(60, 60, 60)
-        };
-        titleBar.MouseDown += (s, e) => {
-            if (e.Button == MouseButtons.Left) {
-                ReleaseCapture();
-                SendMessage(this.Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+        if (editorTabs.SelectedTab != null && editorTabs.SelectedTab.Controls.Count > 0) {
+            if (editorTabs.SelectedTab.Controls[0] is WebView2 webView) {
+                try {
+                    return await webView.ExecuteScriptAsync("editor.getValue();");
+                } catch { }
             }
-        };
-
-        titleLabel = new Label {
-            Text = "THE BAD PLACE EXECUTOR",
-            ForeColor = Color.White,
-            Location = new Point(10, 5),
-            AutoSize = true,
-            Font = new Font("Segoe UI", 9, FontStyle.Bold)
-        };
-
-        closeButton = new Button {
-            Text = "X",
-            Size = new Size(30, 30),
-            Dock = DockStyle.Right,
-            FlatStyle = FlatStyle.Flat,
-            ForeColor = Color.White,
-            BackColor = Color.FromArgb(60, 60, 60)
-        };
-        closeButton.FlatAppearance.BorderSize = 0;
-        closeButton.Click += (s, e) => Application.Exit();
-
-        minimizeButton = new Button {
-            Text = "_",
-            Size = new Size(30, 30),
-            Dock = DockStyle.Right,
-            FlatStyle = FlatStyle.Flat,
-            ForeColor = Color.White,
-            BackColor = Color.FromArgb(60, 60, 60)
-        };
-        minimizeButton.FlatAppearance.BorderSize = 0;
-        minimizeButton.Click += (s, e) => this.WindowState = FormWindowState.Minimized;
-
-        titleBar.Controls.Add(titleLabel);
-        titleBar.Controls.Add(minimizeButton);
-        titleBar.Controls.Add(closeButton);
-
-        // Editor and ListBox Container
-        Panel mainContent = new Panel {
-            Dock = DockStyle.Fill,
-            Padding = new Padding(5)
-        };
-
-        Panel editorBorder = new Panel {
-            Dock = DockStyle.Fill,
-            BackColor = BorderColor,
-            Padding = new Padding(1)
-        };
-
-        editorTabs = new TabControl {
-            Dock = DockStyle.Fill,
-            Appearance = TabAppearance.Normal,
-            Padding = new Point(12, 3),
-            DrawMode = TabDrawMode.OwnerDrawFixed,
-            BackColor = InactiveTabColor
-        };
-        editorTabs.Paint += (s, e) => {
-            // Fill background and draw border to prevent white lines
-            e.Graphics.Clear(InactiveTabColor);
-            using (var pen = new Pen(BorderColor, 1)) {
-                e.Graphics.DrawRectangle(pen, 0, 0, editorTabs.Width - 1, editorTabs.Height - 1);
-            }
-        };
-        editorTabs.DrawItem += (s, e) => {
-            var tabRect = editorTabs.GetTabRect(e.Index);
-            bool isSelected = editorTabs.SelectedIndex == e.Index;
-            
-            using (var brush = new SolidBrush(isSelected ? ActiveTabColor : InactiveTabColor)) {
-                e.Graphics.FillRectangle(brush, tabRect);
-            }
-
-            // Draw border for the tab itself
-            using (var pen = new Pen(BorderColor)) {
-                e.Graphics.DrawRectangle(pen, tabRect);
-            }
-
-            TextRenderer.DrawText(e.Graphics, editorTabs.TabPages[e.Index].Text, editorTabs.Font, 
-                new Point(tabRect.X + 8, tabRect.Y + 6), TextColor);
-
-            // Draw X to close
-            if (editorTabs.TabPages.Count > 1) {
-                TextRenderer.DrawText(e.Graphics, "x", editorTabs.Font, 
-                    new Point(tabRect.Right - 15, tabRect.Y + 5), Color.Gray);
-            }
-        };
-        editorTabs.MouseDown += (s, e) => {
-            for (int i = 0; i < editorTabs.TabPages.Count; i++) {
-                var tabRect = editorTabs.GetTabRect(i);
-                var closeRect = new Rectangle(tabRect.Right - 20, tabRect.Y, 20, tabRect.Height);
-                if (closeRect.Contains(e.Location)) {
-                    if (editorTabs.TabPages.Count > 1) {
-                        editorTabs.TabPages.RemoveAt(i);
-                    }
-                    break;
-                }
-            }
-        };
-        
-        // Add initial tab
-        CreateNewTab("Script 1");
-
-        editorBorder.Controls.Add(editorTabs);
-
-        scriptList = new ListBox {
-            Dock = DockStyle.Right,
-            Width = 150,
-            BackColor = Color.FromArgb(30, 30, 30),
-            ForeColor = Color.White,
-            BorderStyle = BorderStyle.None,
-            Font = new Font("Segoe UI", 9)
-        };
-
-        Panel scriptListBorder = new Panel {
-            Dock = DockStyle.Right,
-            Width = 152,
-            BackColor = BorderColor,
-            Padding = new Padding(1)
-        };
-        scriptListBorder.Controls.Add(scriptList);
-
-        mainContent.Controls.Add(editorBorder);
-        mainContent.Controls.Add(scriptListBorder);
-
-        // Button Panel
-        buttonPanel = new FlowLayoutPanel {
-            Dock = DockStyle.Bottom,
-            Height = 35,
-            Padding = new Padding(2),
-            BackColor = Color.FromArgb(45, 45, 45),
-            WrapContents = false
-        };
-
-        statusDot = new Label {
-            Text = "●",
-            ForeColor = Color.Red,
-            AutoSize = true,
-            Font = new Font("Segoe UI", 12, FontStyle.Bold),
-            Margin = new Padding(0, 5, 0, 0)
-        };
-
-        statusText = new Label {
-            Text = "NOT ATTACHED",
-            ForeColor = Color.White,
-            AutoSize = true,
-            Font = new Font("Segoe UI", 8, FontStyle.Bold),
-            Margin = new Padding(0, 8, 10, 0)
-        };
-
-        executeBtn = CreateStyledButton("Execute");
-        clearBtn = CreateStyledButton("Clear");
-        openFileBtn = CreateStyledButton("Open File");
-        saveFileBtn = CreateStyledButton("Save File");
-        optionsBtn = CreateStyledButton("Options");
-        scriptHubBtn = CreateStyledButton("Script Hub");
-
-        buttonPanel.Controls.AddRange(new Control[] { 
-            statusDot, statusText, executeBtn, clearBtn, openFileBtn, saveFileBtn, optionsBtn, scriptHubBtn 
-        });
-
-        this.Controls.Add(mainContent);
-        this.Controls.Add(buttonPanel);
-        this.Controls.Add(titleBar);
-
-        this.ResumeLayout(false);
+        }
+        return "";
     }
 
-    private Button CreateStyledButton(string text)
+    private async void SetEditorText(string text)
     {
-        var btn = new Button {
-            Text = text,
-            Size = new Size(90, 28),
-            FlatStyle = FlatStyle.Flat,
-            BackColor = Color.FromArgb(60, 60, 60),
-            ForeColor = Color.White,
-            Font = new Font("Segoe UI", 8),
-            Margin = new Padding(2, 4, 2, 4)
-        };
-        btn.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
-        btn.FlatAppearance.BorderSize = 1;
-        return btn;
-    }
-
-    private void SetupStyles()
-    {
-        // Add rounded corners or other styles if needed
+        if (editorTabs.SelectedTab != null && editorTabs.SelectedTab.Controls.Count > 0) {
+            if (editorTabs.SelectedTab.Controls[0] is WebView2 webView) {
+                try {
+                    string escapedText = JsonSerializer.Serialize(text);
+                    await webView.ExecuteScriptAsync($"editor.setValue({escapedText});");
+                } catch { }
+            }
+        }
     }
 
     private WebView2 CreateNewTab(string title)
@@ -398,71 +244,34 @@ public partial class MainForm : Form
         page.BackColor = InactiveTabColor;
         WebView2 webView = new WebView2 {
             Dock = DockStyle.Fill,
-            BackColor = Color.FromArgb(30, 30, 30)
+            BackColor = InactiveTabColor
         };
+        
+        webView.CoreWebView2InitializationCompleted += async (s, e) => {
+            if (e.IsSuccess) {
+                string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Editor", "SynMonaco", "EditorPolytoria.html");
+                if (File.Exists(htmlPath)) {
+                    webView.CoreWebView2.Navigate("file:///" + htmlPath.Replace("\\", "/"));
+                    
+                    // Inject completions and highlighting after navigation
+                    webView.CoreWebView2.NavigationCompleted += async (sender, args) => {
+                        if (args.IsSuccess) {
+                            if (!string.IsNullOrEmpty(cachedCompletionsJs)) {
+                                await webView.CoreWebView2.ExecuteScriptAsync(cachedCompletionsJs);
+                            }
+                            if (!string.IsNullOrEmpty(cachedHighlightConfigJson)) {
+                                await webView.CoreWebView2.ExecuteScriptAsync($"setHighlightingConfig({cachedHighlightConfigJson});");
+                            }
+                        }
+                    };
+                }
+            }
+        };
+
+        webView.EnsureCoreWebView2Async();
         page.Controls.Add(webView);
         editorTabs.TabPages.Add(page);
         editorTabs.SelectedTab = page;
-        
-        InitializeEditorForView(webView);
         return webView;
-    }
-
-    private WebView2? GetCurrentEditor()
-    {
-        if (editorTabs.SelectedTab != null && editorTabs.SelectedTab.Controls.Count > 0) {
-            return editorTabs.SelectedTab.Controls[0] as WebView2;
-        }
-        return null;
-    }
-
-    private async void InitializeEditorForView(WebView2 view)
-    {
-        try {
-            await view.EnsureCoreWebView2Async(null);
-
-            view.NavigationCompleted += async (s, e) => {
-                if (e.IsSuccess) {
-                    if (!string.IsNullOrEmpty(cachedHighlightConfigJson)) {
-                        string encoded = JsonSerializer.Serialize(cachedHighlightConfigJson);
-                        await view.ExecuteScriptAsync($"LoadHighlighting({encoded})");
-                    }
-                    if (!string.IsNullOrEmpty(cachedCompletionsJs)) {
-                        await view.ExecuteScriptAsync(cachedCompletionsJs);
-                    }
-                }
-            };
-
-            string editorPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Editor", "SynMonaco", "EditorPolytoria.html");
-            if (File.Exists(editorPath)) {
-                view.Source = new Uri(editorPath);
-            } else {
-                string devPath = Path.Combine(Directory.GetCurrentDirectory(), "Editor", "SynMonaco", "EditorPolytoria.html");
-                if (File.Exists(devPath)) {
-                    view.Source = new Uri(devPath);
-                }
-            }
-        } catch (Exception ex) {
-            MessageBox.Show("Failed to initialize editor tab: " + ex.Message);
-        }
-    }
-
-    // Helper to get text from current editor (async)
-    public async Task<string> GetEditorText()
-    {
-        var view = GetCurrentEditor();
-        if (view != null && view.CoreWebView2 != null) {
-            return await view.ExecuteScriptAsync("GetText()");
-        }
-        return "";
-    }
-
-    public async void SetEditorText(string text)
-    {
-        var view = GetCurrentEditor();
-        if (view != null && view.CoreWebView2 != null) {
-            string encoded = JsonSerializer.Serialize(text);
-            await view.ExecuteScriptAsync($"SetText({encoded})");
-        }
     }
 }
