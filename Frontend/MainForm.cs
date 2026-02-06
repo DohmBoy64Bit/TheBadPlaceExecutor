@@ -22,7 +22,7 @@ public partial class MainForm : Form
     private System.Windows.Forms.Timer statusTimer;
 
     // Theme Colors
-    private readonly Color BorderColor = Color.FromArgb(60, 60, 60);
+    private readonly Color BorderColor = Color.FromArgb(35, 35, 35);
     private readonly Color ActiveTabColor = Color.FromArgb(45, 45, 45);
     private readonly Color InactiveTabColor = Color.FromArgb(30, 30, 30);
     private readonly Color TextColor = Color.White;
@@ -251,7 +251,7 @@ public partial class MainForm : Form
         Panel editorBorder = new Panel {
             Dock = DockStyle.Fill,
             BackColor = BorderColor,
-            Padding = new Padding(2)
+            Padding = new Padding(1)
         };
 
         editorTabs = new TabControl {
@@ -262,9 +262,10 @@ public partial class MainForm : Form
             BackColor = InactiveTabColor
         };
         editorTabs.Paint += (s, e) => {
-            // Fill the area behind the tabs
-            using (var brush = new SolidBrush(InactiveTabColor)) {
-                e.Graphics.FillRectangle(brush, editorTabs.ClientRectangle);
+            // Fill background and draw border to prevent white lines
+            e.Graphics.Clear(InactiveTabColor);
+            using (var pen = new Pen(BorderColor, 1)) {
+                e.Graphics.DrawRectangle(pen, 0, 0, editorTabs.Width - 1, editorTabs.Height - 1);
             }
         };
         editorTabs.DrawItem += (s, e) => {
