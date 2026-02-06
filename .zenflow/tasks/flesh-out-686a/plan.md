@@ -84,7 +84,8 @@ Implement script execution on the Unity main thread and register custom Lua comm
 
 Verification: Execute `print_custom("Test")` via the captured script and verify output in the game console.
 
-### [ ] Step: Frontend - Basic UI & Monaco
+### [x] Step: Frontend - Basic UI & Monaco
+<!-- chat-id: 16341af0-c3e9-429c-9ab9-e8b21fc575a2 -->
 Create the WinForms application layout and integrate the SynMonaco editor.
 
 1. Create the `Frontend` project and `MainForm.cs`.
