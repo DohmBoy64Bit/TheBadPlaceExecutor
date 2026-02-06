@@ -40,12 +40,14 @@ A lightweight communication layer using Windows Named Pipes.
 ### 2.3. Frontend (UI)
 A standalone WinForms application designed to mimic Synapse X.
 
-- **Main Form**:
-  - **SynMonaco Integration**: Uses a `WebBrowser` control (or `WebView2`) to host `EditorPolytoria.html` from the `SynMonaco` library.
-  - **Controls**:
-    - `ExecuteButton`: Sends current editor text to the IPC Bridge.
-    - `ClearButton`: Clears the editor (via JS call to Ace).
-    - `OpenButton/SaveButton`: Standard file I/O for `.lua` files.
+- **Layout Structure**:
+  - **Header**: Custom title bar with "The Bad Place Executor" and minimal window controls.
+  - **Main Area**: 
+    - **Center**: Tabbed interface hosting multiple SynMonaco editor instances.
+    - **Right Sidebar**: ListBox or TreeView for a "Scripts" folder browser, allowing quick loading.
+  - **Footer**: A horizontal panel containing primary action buttons: `Execute`, `Clear`, `Open File`, `Save File`, `Script Hub`, and `Options`.
+- **Theming**: Dark mode (Dracula or Tomorrow Night Eighties) to match the game's aesthetic and professional executor standards.
+- **SynMonaco Integration**: Uses a `WebBrowser` control (or `WebView2`) to host `EditorPolytoria.html` from the `SynMonaco` library.
 - **Independence**: The UI process does not reference any Unity or Polytoria DLLs.
 
 ### 2.4. API Extension (Custom Command Registry)
