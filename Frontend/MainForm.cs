@@ -2,6 +2,7 @@ using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using Frontend.IPC;
 
 namespace Frontend;
 
@@ -37,6 +38,29 @@ public partial class MainForm : Form
         InitializeComponent();
         SetupStyles();
         InitializeEditor();
+        SetupEvents();
+    }
+
+    private void SetupEvents()
+    {
+        executeBtn.Click += async (s, e) => {
+            string script = await GetEditorText();
+            if (!string.IsNullOrEmpty(script)) {
+                // Remove quotes from ExecuteScriptAsync result if present
+                if (script.StartsWith("\"") && script.EndsWith("\"")) {
+                    script = JsonSerializer.Deserialize<string>(script) ?? script;
+                }
+                await PipeClient.SendScript(script);
+            }
+        };
+
+        clearBtn.Click += (s, e) => {
+            SetEditorText("");
+        };
+
+        attachBtn.Click += (s, e) => {
+            MessageBox.Show("Attachment is handled automatically by MelonLoader in this prototype.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        };
     }
 
     private void InitializeComponent()
