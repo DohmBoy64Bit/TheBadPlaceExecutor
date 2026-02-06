@@ -41,6 +41,14 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            this.BeginMoveDrag(e);
+        }
+    }
+
     private void LogCrash(Exception ex)
     {
         string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TheBadPlace", "crash_main.log");

@@ -49,7 +49,7 @@
 
         <DockPanel Margin="1">
             <!-- Custom Title Bar -->
-            <Border DockPanel.Dock="Top" Height="32" Background="#1A1A1A">
+            <Border DockPanel.Dock="Top" Height="32" Background="#1A1A1A" PointerPressed="OnPointerPressed">
                 <Grid>
                     <TextBlock Text="THE BAD PLACE EXECUTOR" 
                                Foreground="#CCFFFFFF" 
