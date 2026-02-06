@@ -3,6 +3,7 @@ using Microsoft.Web.WebView2.WinForms;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using Frontend.IPC;
+using Frontend.Utils;
 
 namespace Frontend;
 
@@ -15,6 +16,10 @@ public partial class MainForm : Form
     private WebView2 editorView;
     private ListBox scriptList;
     private FlowLayoutPanel buttonPanel;
+    private TabControl editorTabs;
+    private Label statusDot;
+    private Label statusText;
+    private System.Windows.Forms.Timer statusTimer;
     
     // Synapse X style buttons
     private Button executeBtn;
@@ -35,10 +40,60 @@ public partial class MainForm : Form
 
     public MainForm()
     {
+        EnvironmentUtils.InitializeFolders();
         InitializeComponent();
         SetupStyles();
-        InitializeEditor();
         SetupEvents();
+        LoadScripts();
+        SetupFileSystemWatcher();
+        SetupStatusTimer();
+    }
+
+    private void SetupStatusTimer()
+    {
+        statusTimer = new System.Windows.Forms.Timer();
+        statusTimer.Interval = 2000; // Check every 2 seconds
+        statusTimer.Tick += (s, e) => {
+            bool isConnected = false;
+            try {
+                // Check if pipe exists without full connect
+                string pipePath = @"\\.\pipe\TheBadPlace_Executor_Pipe";
+                if (System.IO.File.Exists(pipePath)) {
+                    isConnected = true;
+                }
+            } catch { }
+
+            if (isConnected) {
+                statusDot.ForeColor = Color.Green;
+                statusText.Text = "ATTACHED";
+            } else {
+                statusDot.ForeColor = Color.Red;
+                statusText.Text = "NOT ATTACHED";
+            }
+        };
+        statusTimer.Start();
+    }
+
+    private void SetupFileSystemWatcher()
+    {
+        FileSystemWatcher watcher = new FileSystemWatcher(EnvironmentUtils.ScriptsPath);
+        watcher.Filter = "*.*";
+        watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
+        watcher.EnableRaisingEvents = true;
+        
+        watcher.Created += (s, e) => this.Invoke(new Action(LoadScripts));
+        watcher.Deleted += (s, e) => this.Invoke(new Action(LoadScripts));
+        watcher.Renamed += (s, e) => this.Invoke(new Action(LoadScripts));
+    }
+
+    private void LoadScripts()
+    {
+        scriptList.Items.Clear();
+        if (Directory.Exists(EnvironmentUtils.ScriptsPath)) {
+            foreach (string file in Directory.GetFiles(EnvironmentUtils.ScriptsPath)) {
+                scriptList.Items.Add(Path.GetFileName(file));
+            }
+        }
     }
 
     private void SetupEvents()
@@ -60,6 +115,55 @@ public partial class MainForm : Form
 
         attachBtn.Click += (s, e) => {
             MessageBox.Show("Attachment is handled automatically by MelonLoader in this prototype.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        };
+
+        scriptList.SelectedIndexChanged += async (s, e) => {
+            if (scriptList.SelectedItem != null) {
+                string fileName = scriptList.SelectedItem.ToString();
+                string filePath = Path.Combine(EnvironmentUtils.ScriptsPath, fileName);
+                if (File.Exists(filePath)) {
+                    string content = File.ReadAllText(filePath);
+                    
+                    // If current tab is not empty and not matching this file, maybe open new tab?
+                    // For now, just load into current tab and rename tab
+                    if (editorTabs.SelectedTab != null) {
+                        editorTabs.SelectedTab.Text = fileName;
+                        SetEditorText(content);
+                    }
+                }
+            }
+        };
+
+        optionsBtn.Text = "+";
+        optionsBtn.Size = new Size(30, 30);
+        optionsBtn.Click += (s, e) => {
+            CreateNewTab("Script " + (editorTabs.TabPages.Count + 1));
+        };
+
+        openFileBtn.Click += (s, e) => {
+            using (OpenFileDialog ofd = new OpenFileDialog()) {
+                ofd.InitialDirectory = EnvironmentUtils.ScriptsPath;
+                ofd.Filter = "Lua files (*.lua)|*.lua|Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                if (ofd.ShowDialog() == DialogResult.OK) {
+                    string content = File.ReadAllText(ofd.FileName);
+                    SetEditorText(content);
+                }
+            }
+        };
+
+        saveFileBtn.Click += async (s, e) => {
+            using (SaveFileDialog sfd = new SaveFileDialog()) {
+                sfd.InitialDirectory = EnvironmentUtils.ScriptsPath;
+                sfd.Filter = "Lua files (*.lua)|*.lua|Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                if (sfd.ShowDialog() == DialogResult.OK) {
+                    string content = await GetEditorText();
+                    // Clean up potential JSON quotes from Monaco return
+                    if (content.StartsWith("\"") && content.EndsWith("\"")) {
+                        content = JsonSerializer.Deserialize<string>(content) ?? content;
+                    }
+                    File.WriteAllText(sfd.FileName, content);
+                }
+            }
         };
     }
 
@@ -127,10 +231,13 @@ public partial class MainForm : Form
             Padding = new Padding(5)
         };
 
-        editorView = new WebView2 {
+        editorTabs = new TabControl {
             Dock = DockStyle.Fill,
-            BackColor = Color.FromArgb(30, 30, 30)
+            Appearance = TabAppearance.Normal,
+            Padding = new Point(10, 3)
         };
+        // Add initial tab
+        CreateNewTab("Script 1");
 
         scriptList = new ListBox {
             Dock = DockStyle.Right,
@@ -141,7 +248,7 @@ public partial class MainForm : Form
             Font = new Font("Segoe UI", 9)
         };
 
-        mainContent.Controls.Add(editorView);
+        mainContent.Controls.Add(editorTabs);
         mainContent.Controls.Add(scriptList);
 
         // Button Panel
@@ -150,6 +257,22 @@ public partial class MainForm : Form
             Height = 40,
             Padding = new Padding(5),
             BackColor = Color.FromArgb(45, 45, 45)
+        };
+
+        statusDot = new Label {
+            Text = "●",
+            ForeColor = Color.Red,
+            AutoSize = true,
+            Font = new Font("Segoe UI", 12, FontStyle.Bold),
+            Margin = new Padding(0, 5, 0, 0)
+        };
+
+        statusText = new Label {
+            Text = "NOT ATTACHED",
+            ForeColor = Color.White,
+            AutoSize = true,
+            Font = new Font("Segoe UI", 8, FontStyle.Bold),
+            Margin = new Padding(0, 8, 10, 0)
         };
 
         executeBtn = CreateStyledButton("Execute");
@@ -161,7 +284,7 @@ public partial class MainForm : Form
         scriptHubBtn = CreateStyledButton("Script Hub");
 
         buttonPanel.Controls.AddRange(new Control[] { 
-            executeBtn, clearBtn, openFileBtn, saveFileBtn, optionsBtn, attachBtn, scriptHubBtn 
+            statusDot, statusText, executeBtn, clearBtn, openFileBtn, saveFileBtn, optionsBtn, attachBtn, scriptHubBtn 
         });
 
         this.Controls.Add(mainContent);
@@ -190,34 +313,63 @@ public partial class MainForm : Form
         // Add rounded corners or other styles if needed
     }
 
-    private async void InitializeEditor()
+    private WebView2 CreateNewTab(string title)
+    {
+        TabPage page = new TabPage(title);
+        WebView2 webView = new WebView2 {
+            Dock = DockStyle.Fill,
+            BackColor = Color.FromArgb(30, 30, 30)
+        };
+        page.Controls.Add(webView);
+        editorTabs.TabPages.Add(page);
+        editorTabs.SelectedTab = page;
+        
+        InitializeEditorForView(webView);
+        return webView;
+    }
+
+    private WebView2? GetCurrentEditor()
+    {
+        if (editorTabs.SelectedTab != null && editorTabs.SelectedTab.Controls.Count > 0) {
+            return editorTabs.SelectedTab.Controls[0] as WebView2;
+        }
+        return null;
+    }
+
+    private async void InitializeEditorForView(WebView2 view)
     {
         try {
-            await editorView.EnsureCoreWebView2Async(null);
+            await view.EnsureCoreWebView2Async(null);
             string editorPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Editor", "SynMonaco", "EditorPolytoria.html");
             if (File.Exists(editorPath)) {
-                editorView.Source = new Uri(editorPath);
+                view.Source = new Uri(editorPath);
             } else {
-                // Fallback for development if not in output dir yet
                 string devPath = Path.Combine(Directory.GetCurrentDirectory(), "Editor", "SynMonaco", "EditorPolytoria.html");
                 if (File.Exists(devPath)) {
-                    editorView.Source = new Uri(devPath);
+                    view.Source = new Uri(devPath);
                 }
             }
         } catch (Exception ex) {
-            MessageBox.Show("Failed to initialize editor: " + ex.Message);
+            MessageBox.Show("Failed to initialize editor tab: " + ex.Message);
         }
     }
 
-    // Helper to get text from editor (async)
+    // Helper to get text from current editor (async)
     public async Task<string> GetEditorText()
     {
-        return await editorView.ExecuteScriptAsync("GetText()");
+        var view = GetCurrentEditor();
+        if (view != null && view.CoreWebView2 != null) {
+            return await view.ExecuteScriptAsync("GetText()");
+        }
+        return "";
     }
 
     public async void SetEditorText(string text)
     {
-        string encoded = JsonSerializer.Serialize(text);
-        await editorView.ExecuteScriptAsync($"SetText({encoded})");
+        var view = GetCurrentEditor();
+        if (view != null && view.CoreWebView2 != null) {
+            string encoded = JsonSerializer.Serialize(text);
+            await view.ExecuteScriptAsync($"SetText({encoded})");
+        }
     }
 }

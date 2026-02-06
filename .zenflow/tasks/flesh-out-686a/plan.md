@@ -103,3 +103,37 @@ Implement the IPC client and connect the UI "Execute" button to the Backend.
 3. Final end-to-end testing of the full execution flow.
 
 Verification: Type `print_custom("Hello from UI")` in the editor, click Execute, and see the message in the Polytoria console.
+
+### [x] Step: Environment - Folder Setup (AppData)
+Initialize the AppData folder structure for scripts and configuration.
+
+1. Define a shared `EnvironmentUtils` or constant class for paths.
+2. Create `%AppData%\TheBadPlace\AutoExec`, `Scripts`, and `Workspace` folders on startup in both Frontend and Backend.
+
+Verification: Folders exist in AppData after running the applications.
+
+### [x] Step: Frontend - Script Hub & File System Integration
+Implement script loading and management.
+
+1. Populate the `scriptList` in `MainForm.cs` from the `Scripts` folder.
+2. Implement file clicking to load content into the current tab.
+3. Implement "Open File" and "Save File" button logic.
+
+Verification: Files in the `Scripts` folder show up in the UI and can be loaded/saved.
+
+### [x] Step: Frontend - UI Polish (Tabs & Status)
+Enhance the UI with multi-tab support and connection status.
+
+1. Replace single `WebView2` with a `TabControl` containing `WebView2` instances.
+2. Add a status label/dot to indicate if the IPC connection to the game is active.
+3. Add a "+" button to create new script tabs.
+
+Verification: Can open multiple tabs and switch between them. Status indicator updates based on connection success.
+
+### [x] Step: Core Backend - AutoExec Implementation
+Implement automatic script execution on startup.
+
+1. Backend should scan `%AppData%\TheBadPlace\AutoExec` on initialization.
+2. Execute all `.lua` and `.txt` files found in that folder using the captured script instance.
+
+Verification: Scripts placed in `AutoExec` run automatically when the mod initializes in-game.
