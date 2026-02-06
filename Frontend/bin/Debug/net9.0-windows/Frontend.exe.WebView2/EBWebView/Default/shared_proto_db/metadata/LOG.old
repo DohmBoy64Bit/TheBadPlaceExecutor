@@ -1,2 +1,3 @@
-2026/02/06-14:51:45.528 37a0 Creating DB C:\Users\SeanS\.zenflow\worktrees\flesh-out-686a\Frontend\bin\Debug\net9.0-windows\Frontend.exe.WebView2\EBWebView\Default\shared_proto_db\metadata since it was missing.
-2026/02/06-14:51:45.551 37a0 Reusing MANIFEST C:\Users\SeanS\.zenflow\worktrees\flesh-out-686a\Frontend\bin\Debug\net9.0-windows\Frontend.exe.WebView2\EBWebView\Default\shared_proto_db\metadata/MANIFEST-000001
+2026/02/06-14:55:07.287 1128 Reusing MANIFEST C:\Users\SeanS\.zenflow\worktrees\flesh-out-686a\Frontend\bin\Debug\net9.0-windows\Frontend.exe.WebView2\EBWebView\Default\shared_proto_db\metadata/MANIFEST-000001
+2026/02/06-14:55:07.288 1128 Recovering log #3
+2026/02/06-14:55:07.288 1128 Reusing old log C:\Users\SeanS\.zenflow\worktrees\flesh-out-686a\Frontend\bin\Debug\net9.0-windows\Frontend.exe.WebView2\EBWebView\Default\shared_proto_db\metadata/000003.log 

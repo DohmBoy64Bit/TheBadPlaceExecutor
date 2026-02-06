@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BadPlaceExecutor.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+83a4a60db544bbf350f0e8ef09fbde5810b387b8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5bd478accc599b73b792324ac4229ab73215cce9")]
 [assembly: System.Reflection.AssemblyProductAttribute("BadPlaceExecutor.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BadPlaceExecutor.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
