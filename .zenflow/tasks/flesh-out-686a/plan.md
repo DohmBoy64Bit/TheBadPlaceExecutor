@@ -53,7 +53,8 @@ If the feature is trivial and doesn't warrant full specification, update this wo
 
 Save to `{@artifacts_path}/plan.md`.
 
-### [ ] Step: Core Backend - Setup & Capture
+### [x] Step: Core Backend - Setup & Capture
+<!-- chat-id: fb5373ee-ce6a-4cb4-ba82-e9d7b8fcf9d8 -->
 Initialize the MelonLoader mod and apply Harmony patches to capture the active `MoonSharp.Interpreter.Script` instance.
 
 1. Create the `CoreBackend` project structure.
