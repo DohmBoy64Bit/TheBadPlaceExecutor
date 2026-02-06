@@ -84,15 +84,15 @@ Implement script execution on the Unity main thread and register custom Lua comm
 
 Verification: Execute `print_custom("Test")` via the captured script and verify output in the game console.
 
-### [x] Step: Frontend - Basic UI & Monaco
-<!-- chat-id: 16341af0-c3e9-429c-9ab9-e8b21fc575a2 -->
-Create the WinForms application layout and integrate the SynMonaco editor.
+### [x] Step: Frontend - Migrate to Avalonia UI
+Migrate the Frontend from WinForms to Avalonia UI for a more modern look and cross-platform potential.
 
-1. Create the `Frontend` project and `MainForm.cs`.
-2. Implement the Synapse X-style layout (Tabs, Sidebar, Buttons).
-3. Integrate SynMonaco using a `WebBrowser` or `WebView2` control.
+1. Update `Frontend.csproj` with Avalonia 11 and `WebViewControl-Avalonia`.
+2. Implement `App.axaml` and `MainWindow.axaml` (Synapse X style).
+3. Port logic from `MainForm.cs` to `MainWindow.axaml.cs`.
+4. Verify build and IPC integration.
 
-Verification: Launch the UI and verify that the editor loads and buttons are visible.
+Verification: Build succeeds and the UI launches with functional script execution.
 
 ### [x] Step: Frontend - IPC Client & Integration
 <!-- chat-id: 1148ed18-4f5a-4ce8-a5e4-7898e2750f2e -->

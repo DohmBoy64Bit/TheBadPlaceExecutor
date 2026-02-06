@@ -29,11 +29,11 @@ namespace Frontend.IPC
             catch (TimeoutException)
             {
                 // Game probably not running or attached
-                System.Windows.Forms.MessageBox.Show("Failed to connect to game. Is it running and attached?", "IPC Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                Console.WriteLine("Failed to connect to game. Is it running and attached?");
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show($"IPC Error: {ex.Message}", "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                Console.WriteLine($"IPC Error: {ex.Message}");
             }
         }
     }

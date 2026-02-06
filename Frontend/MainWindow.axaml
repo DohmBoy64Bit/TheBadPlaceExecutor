@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Frontend.MainWindow"
+        Title="The Bad Place Executor"
+        Width="800" Height="450"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Background="#2D2D2D">
+
+    <Window.Styles>
+        <Style Selector="Button.executor">
+            <Setter Property="Background" Value="#3C3C3C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#505050"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.executor:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#4A4A4A"/>
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+        <!-- Title Bar -->
+        <Border DockPanel.Dock="Top" Height="30" Background="#3C3C3C">
+            <TextBlock Text="THE BAD PLACE EXECUTOR" 
+                       Foreground="White" 
+                       VerticalAlignment="Center" 
+                       Margin="10,0" 
+                       FontWeight="Bold" 
+                       FontSize="12"
+                       IsHitTestVisible="False"/>
+        </Border>
+
+        <!-- Bottom Panel -->
+        <Border DockPanel.Dock="Bottom" Height="40" Background="#2D2D2D" BorderBrush="#232323" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" Margin="5,0" Spacing="5">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,10,0" Spacing="5">
+                    <Ellipse Name="StatusDot" Width="10" Height="10" Fill="Red"/>
+                    <TextBlock Name="StatusText" Text="NOT ATTACHED" Foreground="White" VerticalAlignment="Center" FontSize="11" FontWeight="Bold"/>
+                </StackPanel>
+                
+                <Button Name="ExecuteBtn" Content="Execute" Classes="executor"/>
+                <Button Name="ClearBtn" Content="Clear" Classes="executor"/>
+                <Button Name="OpenFileBtn" Content="Open File" Classes="executor"/>
+                <Button Name="SaveFileBtn" Content="Save File" Classes="executor"/>
+                <Button Name="OptionsBtn" Content="+" Classes="executor" Width="30"/>
+                <Button Name="ScriptHubBtn" Content="Script Hub" Classes="executor"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="150"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Editor Section -->
+            <Border Margin="5" Background="#232323" BorderBrush="#232323" BorderThickness="1">
+                <TabControl Name="EditorTabs" Background="Transparent" x:CompileBindings="False">
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Header}"/>
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>
+                </TabControl>
+            </Border>
+
+            <!-- Sidebar -->
+            <Border Grid.Column="1" Margin="0,5,5,5" Background="#232323" BorderBrush="#232323" BorderThickness="1">
+                <ListBox Name="ScriptList" Background="#1E1E1E" Foreground="White" BorderThickness="0">
+                </ListBox>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>
