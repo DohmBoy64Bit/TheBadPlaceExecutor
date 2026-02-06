@@ -24,6 +24,7 @@ public partial class MainForm : Form
     // Autocomplete support
     private ApiParser apiParser = new ApiParser();
     private string? cachedCompletionsJs;
+    private string? cachedHighlightConfigJson;
     
     // Synapse X style buttons
     private Button executeBtn;
@@ -62,6 +63,7 @@ public partial class MainForm : Form
             if (apiParser.LoadFromFile(xmlPath))
             {
                 cachedCompletionsJs = AutocompleteGenerator.GeneratePolytoriaCompletions(apiParser);
+                cachedHighlightConfigJson = AutocompleteGenerator.GenerateHighlightConfig(apiParser);
             }
         }
     }
@@ -359,8 +361,14 @@ public partial class MainForm : Form
             await view.EnsureCoreWebView2Async(null);
 
             view.NavigationCompleted += async (s, e) => {
-                if (e.IsSuccess && !string.IsNullOrEmpty(cachedCompletionsJs)) {
-                    await view.ExecuteScriptAsync(cachedCompletionsJs);
+                if (e.IsSuccess) {
+                    if (!string.IsNullOrEmpty(cachedHighlightConfigJson)) {
+                        string encoded = JsonSerializer.Serialize(cachedHighlightConfigJson);
+                        await view.ExecuteScriptAsync($"LoadHighlighting({encoded})");
+                    }
+                    if (!string.IsNullOrEmpty(cachedCompletionsJs)) {
+                        await view.ExecuteScriptAsync(cachedCompletionsJs);
+                    }
                 }
             };
 

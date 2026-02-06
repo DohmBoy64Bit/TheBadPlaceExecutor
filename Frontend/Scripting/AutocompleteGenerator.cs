@@ -85,5 +85,25 @@ namespace Frontend.Scripting
             sb.AppendLine("};");
             return sb.ToString();
         }
+
+        public static string GenerateHighlightConfig(ApiParser parser)
+        {
+            var classes = parser.Classes.Keys.ToList();
+            var functions = new List<string> { 
+                "readfile", "writefile", "appendfile", "isfile", "isfolder", 
+                "makefolder", "delfile", "delfolder", "listfiles", 
+                "getclipboard", "setclipboard", "toclipboard" 
+            };
+            var constants = new List<string> { "game", "workspace", "script" };
+
+            var config = new
+            {
+                keywords = string.Join("|", classes),
+                functions = string.Join("|", functions),
+                constants = string.Join("|", constants)
+            };
+
+            return System.Text.Json.JsonSerializer.Serialize(config);
+        }
     }
 }

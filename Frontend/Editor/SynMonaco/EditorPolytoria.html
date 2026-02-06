@@ -35,6 +35,7 @@
         var ClearText;
         var SetTheme;
         var LoadCompletions;
+        var LoadHighlighting;
 
         ace.require("ace/ext/language_tools");
         var editor = ace.edit("editor");
@@ -197,6 +198,29 @@
                 console.log("Polytoria completions loaded!");
             } catch(e) {
                 console.error("Failed to load completions: " + e);
+            }
+        }
+
+        LoadHighlighting = function(highlightConfigJs) {
+            try {
+                var config = JSON.parse(highlightConfigJs);
+                var LuaHighlightRules = ace.require("ace/mode/lua_highlight_rules").LuaHighlightRules;
+                
+                // Inject new keywords into the mapper
+                var oldGetKeywordMapper = LuaHighlightRules.prototype.getKeywordMapper;
+                LuaHighlightRules.prototype.createKeywordMapper = function(map, defaultToken, ignoreCase, splitChar) {
+                    if (config.keywords) map["keyword"] += "|" + config.keywords;
+                    if (config.functions) map["support.function"] += "|" + config.functions;
+                    if (config.constants) map["constant.language"] += "|" + config.constants;
+                    
+                    return oldGetKeywordMapper.call(this, map, defaultToken, ignoreCase, splitChar);
+                };
+                
+                // Re-instantiate the highlight rules for the current session
+                editor.session.setMode("ace/mode/lua");
+                console.log("Polytoria highlighting loaded!");
+            } catch(e) {
+                console.error("Failed to load highlighting: " + e);
             }
         }
 
