@@ -64,7 +64,8 @@ Initialize the MelonLoader mod and apply Harmony patches to capture the active `
 
 Verification: Check `MelonLoader` logs for "Captured Script Instance" message when in-game scripts run.
 
-### [ ] Step: Core Backend - IPC Server
+### [x] Step: Core Backend - IPC Server
+<!-- chat-id: 4fa0bb1f-752a-4d3c-bcf5-72b3ef697ded -->
 Implement a Named Pipe server to receive script strings from the external UI.
 
 1. Implement `PipeServer.cs` using `System.IO.Pipes`.
