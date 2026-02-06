@@ -74,7 +74,8 @@ Implement a Named Pipe server to receive script strings from the external UI.
 
 Verification: Use a simple script to send data to the pipe and log the received content in the game console.
 
-### [ ] Step: Core Backend - Script Execution & API
+### [x] Step: Core Backend - Script Execution & API
+<!-- chat-id: 12ae57ac-4681-40fd-a458-58c48962eb98 -->
 Implement script execution on the Unity main thread and register custom Lua commands.
 
 1. Implement `UnityMainThreadDispatcher.cs` (or use MelonLoader's `OnUpdate`).

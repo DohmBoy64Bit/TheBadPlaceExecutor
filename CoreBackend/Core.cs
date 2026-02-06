@@ -21,5 +21,30 @@ namespace BadPlaceExecutor.Core
             
             MelonLogger.Msg("Initialization complete.");
         }
+
+        public override void OnUpdate()
+        {
+            // Execute scripts received via IPC on the main thread
+            if (PipeServer.TryGetNextScript(out string scriptCode))
+            {
+                var capturedScript = ScriptEngineCapture.CapturedScript;
+                if (capturedScript != null)
+                {
+                    try
+                    {
+                        MelonLogger.Msg("Executing script from IPC...");
+                        capturedScript.DoString(scriptCode);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MelonLogger.Error($"Error executing script: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    MelonLogger.Warning("Received script but no Script instance captured yet.");
+                }
+            }
+        }
     }
 }

@@ -38,7 +38,7 @@ namespace BadPlaceExecutor.Core.Scripting
                 _capturedScript = __instance;
                 MelonLogger.Msg("Captured Script Instance!");
                 
-                // TODO: Register custom commands here in the next step
+                CommandRegistry.RegisterCustomCommands(_capturedScript);
             }
             return true; // Continue execution
         }
