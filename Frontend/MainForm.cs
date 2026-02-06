@@ -32,7 +32,6 @@ public partial class MainForm : Form
     private Button openFileBtn;
     private Button saveFileBtn;
     private Button optionsBtn;
-    private Button attachBtn;
     private Button scriptHubBtn;
 
     // Draggable window support
@@ -130,10 +129,6 @@ public partial class MainForm : Form
 
         clearBtn.Click += (s, e) => {
             SetEditorText("");
-        };
-
-        attachBtn.Click += (s, e) => {
-            MessageBox.Show("Attachment is handled automatically by MelonLoader in this prototype.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
         };
 
         scriptList.SelectedIndexChanged += async (s, e) => {
@@ -299,11 +294,10 @@ public partial class MainForm : Form
         openFileBtn = CreateStyledButton("Open File");
         saveFileBtn = CreateStyledButton("Save File");
         optionsBtn = CreateStyledButton("Options");
-        attachBtn = CreateStyledButton("Attach");
         scriptHubBtn = CreateStyledButton("Script Hub");
 
         buttonPanel.Controls.AddRange(new Control[] { 
-            statusDot, statusText, executeBtn, clearBtn, openFileBtn, saveFileBtn, optionsBtn, attachBtn, scriptHubBtn 
+            statusDot, statusText, executeBtn, clearBtn, openFileBtn, saveFileBtn, optionsBtn, scriptHubBtn 
         });
 
         this.Controls.Add(mainContent);
