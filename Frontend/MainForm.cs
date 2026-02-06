@@ -357,6 +357,13 @@ public partial class MainForm : Form
     {
         try {
             await view.EnsureCoreWebView2Async(null);
+
+            view.NavigationCompleted += async (s, e) => {
+                if (e.IsSuccess && !string.IsNullOrEmpty(cachedCompletionsJs)) {
+                    await view.ExecuteScriptAsync(cachedCompletionsJs);
+                }
+            };
+
             string editorPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Editor", "SynMonaco", "EditorPolytoria.html");
             if (File.Exists(editorPath)) {
                 view.Source = new Uri(editorPath);
