@@ -204,7 +204,8 @@ Clean up WebView and Ace Editor artifacts.
 
 ---
 
-### [ ] Step: Visual Consistency and Styling
+### [x] Step: Visual Consistency and Styling
+<!-- chat-id: 8f227dfe-ac05-47ac-828c-951e4b29b58d -->
 
 Ensure the new AvaloniaEdit implementation matches the current visual design.
 

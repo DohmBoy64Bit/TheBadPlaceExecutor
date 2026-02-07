@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Frontend.MainWindow"
         Title="The Bad Place Executor"
@@ -39,6 +40,16 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="MinHeight" Value="30"/>
             <Setter Property="Padding" Value="10,0"/>
+        </Style>
+        
+        <!-- TextEditor Styling for Dark Theme Consistency -->
+        <Style Selector="avaloniaEdit|TextEditor">
+            <Setter Property="Background" Value="#1E1E1E"/>
+            <Setter Property="Foreground" Value="#DCDCDC"/>
+            <Setter Property="FontFamily" Value="Consolas,Cascadia Code,Courier New"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="LineNumbersForeground" Value="#858585"/>
+            <Setter Property="ShowLineNumbers" Value="True"/>
         </Style>
     </Window.Styles>
 

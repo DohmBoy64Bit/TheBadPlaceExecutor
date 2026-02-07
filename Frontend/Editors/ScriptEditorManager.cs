@@ -59,13 +59,17 @@ public class ScriptEditorManager
         {
             Background = new SolidColorBrush(Color.Parse("#1E1E1E")),
             Foreground = new SolidColorBrush(Color.Parse("#DCDCDC")),
-            FontFamily = new FontFamily("Consolas"),
+            FontFamily = new FontFamily("Consolas,Cascadia Code,Courier New"),
             FontSize = 14,
             ShowLineNumbers = true,
             LineNumbersForeground = new SolidColorBrush(Color.Parse("#858585")),
             Document = new TextDocument(),
             SyntaxHighlighting = luaHighlighting
         };
+
+        editor.TextArea.SelectionBrush = new SolidColorBrush(Color.Parse("#264F78"));
+        editor.TextArea.SelectionForeground = null;
+        editor.TextArea.Caret.CaretBrush = new SolidColorBrush(Color.Parse("#AEAFAD"));
 
         editor.TextArea.TextEntered += OnTextEntered;
 
