@@ -1,0 +1,22 @@
+# .gitignore for The Bad Place Executor
+
+# Build output
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.log
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# WebView2 Runtime data
+*.WebView2/
+
+# User Data (AppData mirrors)
+/TheBadPlace/

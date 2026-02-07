@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>BadPlaceExecutor.Core</RootNamespace>
+    <AssemblyName>BadPlaceExecutor.Core</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>..\..\..\..\AppData\Roaming\Polytoria\Client\1.4.151\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="MelonLoader">
+      <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\MelonLoader.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>D:\BadPlaceExecutor\StarterTemplateForMelonLoader\BadPlaceExecutor\bin\Debug\net6.0\Il2CppInterop.Runtime.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
