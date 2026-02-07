@@ -9,6 +9,7 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Reflection;
 using Frontend.IPC;
 using Frontend.Utils;
 using Frontend.Scripting;
@@ -23,6 +24,29 @@ public partial class MainWindow : Window
     private string? cachedCompletionsJs;
     private string? cachedHighlightConfigJson;
     private DispatcherTimer? statusTimer;
+
+    // Helper to access internal chromium browser via reflection since 'Browser' is internal
+    private CefBrowser? GetCefBrowser(WebView webView)
+    {
+        try
+        {
+            var field = typeof(WebView).GetField("chromium", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (field != null)
+            {
+                var chromium = field.GetValue(webView);
+                if (chromium != null)
+                {
+                    var property = chromium.GetType().GetProperty("UnderlyingBrowser", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (property != null)
+                    {
+                        return property.GetValue(chromium) as CefBrowser;
+                    }
+                }
+            }
+        }
+        catch { }
+        return null;
+    }
 
     public MainWindow()
     {
@@ -197,12 +221,10 @@ public partial class MainWindow : Window
         try {
             if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
                 // Access the browser and main frame to avoid execution isolation
-                var browser = webView.Browser;
+                var browser = GetCefBrowser(webView);
                 if (browser != null) {
                     var mainFrame = browser.GetMainFrame();
                     if (mainFrame != null) {
-                        // Use the wrapper's EvaluateScript which should target the main frame
-                        // If isolation persists, we might need a more direct CefGlue call
                         return await webView.EvaluateScript<string>("GetText();");
                     }
                 }
@@ -217,7 +239,7 @@ public partial class MainWindow : Window
     {
         try {
             if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                var browser = webView.Browser;
+                var browser = GetCefBrowser(webView);
                 if (browser != null) {
                     var mainFrame = browser.GetMainFrame();
                     if (mainFrame != null) {
@@ -236,7 +258,7 @@ public partial class MainWindow : Window
     {
         try {
             if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                var browser = webView.Browser;
+                var browser = GetCefBrowser(webView);
                 if (browser != null) {
                     var mainFrame = browser.GetMainFrame();
                     if (mainFrame != null) {
@@ -264,7 +286,7 @@ public partial class MainWindow : Window
             }
 
             webView.WebViewInitialized += () => {
-                var browser = webView.Browser;
+                var browser = GetCefBrowser(webView);
                 if (browser != null) {
                     var mainFrame = browser.GetMainFrame();
                     if (mainFrame != null) {
