@@ -244,7 +244,8 @@ public partial class MainWindow : Window
             {
                 LogDebug("Requesting text from WebView editor");
                 // EvaluateScript returns a Task; execute it directly
-                string result = await webView.EvaluateScript<string>("editor.getValue();");
+                // Using GetText() function defined in HTML for better reliability
+                string result = await webView.EvaluateScript<string>("GetText();");
                 LogDebug($"WebView returned {result?.Length ?? 0} characters");
                 return result ?? "";
             } else {
@@ -254,7 +255,7 @@ public partial class MainWindow : Window
         catch (Exception ex) 
         {
             LogDebug($"WebView GetText Error: {ex.Message}");
-            LogCrash(ex); // Log the error so you can see why it's failing
+            LogCrash(ex);
         }
         return "";
     }
@@ -295,6 +296,7 @@ public partial class MainWindow : Window
 
             webView.WebViewInitialized += () => {
                 LogDebug($"WebView for {title} initialized");
+                
                 if (!string.IsNullOrEmpty(cachedCompletionsJs)) {
                     LogDebug("Injecting completions");
                     webView.ExecuteScript(cachedCompletionsJs);
