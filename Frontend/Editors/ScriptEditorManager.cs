@@ -64,7 +64,9 @@ public class ScriptEditorManager
             ShowLineNumbers = true,
             LineNumbersForeground = new SolidColorBrush(Color.Parse("#858585")),
             Document = new TextDocument(),
-            SyntaxHighlighting = luaHighlighting
+            SyntaxHighlighting = luaHighlighting,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch
         };
 
         editor.TextArea.SelectionBrush = new SolidColorBrush(Color.Parse("#264F78"));
@@ -76,7 +78,11 @@ public class ScriptEditorManager
         var tabItem = new TabItem
         {
             Header = title,
-            Content = editor
+            Content = editor,
+            FontSize = 12,
+            FontWeight = Avalonia.Media.FontWeight.SemiBold,
+            MinHeight = 30,
+            Padding = new Avalonia.Thickness(10, 0)
         };
 
         var editorTab = new ScriptEditorTab(editor, tabItem);

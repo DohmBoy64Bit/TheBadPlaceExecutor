@@ -26,10 +26,17 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
+        InitializeComponent();
+        
         try {
-            InitializeComponent();
             EnvironmentUtils.InitializeFolders();
             InitializeAutocomplete();
+            
+            if (EditorTabs == null)
+            {
+                File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TheBadPlace", "crash_main.log"), "EditorTabs is null!");
+                return;
+            }
             
             editorManager = new ScriptEditorManager(EditorTabs);
             editorManager.LoadCompletions(apiParser);
