@@ -150,7 +150,8 @@ Create custom autocomplete functionality integrated with ApiParser.
 
 ---
 
-### [ ] Step: Integrate ScriptEditorManager with MainWindow
+### [x] Step: Integrate ScriptEditorManager with MainWindow
+<!-- chat-id: 8a6785d2-6b2c-4850-acfb-e02fef38b5c4 -->
 
 Replace WebView usage in MainWindow with ScriptEditorManager.
 
