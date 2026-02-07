@@ -69,7 +69,8 @@ Add AvaloniaEdit package and create project structure for the new editor system.
 
 ---
 
-### [ ] Step: Create ScriptEditorManager Core
+### [x] Step: Create ScriptEditorManager Core
+<!-- chat-id: eb67d327-bc47-492d-ad5e-571f071efaca -->
 
 Implement the core ScriptEditorManager class with tab management and text operations.
 
