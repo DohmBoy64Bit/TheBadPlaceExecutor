@@ -237,25 +237,31 @@ public partial class MainWindow : Window
 
     private async Task<string> GetEditorText()
     {
-        try 
+        try
         {
-            // Ensure we are looking at the current tab and it contains a WebView
-            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) 
+            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView)
             {
-                LogDebug("Requesting text from WebView editor");
-                // EvaluateScript returns a Task; execute it directly
-                // Using GetText() function defined in HTML for better reliability
-                string result = await webView.EvaluateScript<string>("GetText();");
+                LogDebug("Requesting text from Ace Editor...");
+
+                // We use a Promise-like structure or a simple string return.
+                // Some versions of WebViewControl require the 'return' to be the last evaluated statement.
+                string js = "(function() { try { return GetText(); } catch(e) { return 'ERR:' + e.message; } })();";
+
+                var result = await webView.EvaluateScript<string>(js);
+
+                if (result != null && result.StartsWith("ERR:"))
+                {
+                    LogDebug($"JS Error inside WebView: {result}");
+                    return "";
+                }
+
                 LogDebug($"WebView returned {result?.Length ?? 0} characters");
                 return result ?? "";
-            } else {
-                LogDebug("GetEditorText failed: No active tab or WebView");
             }
-        } 
-        catch (Exception ex) 
+        }
+        catch (Exception ex)
         {
-            LogDebug($"WebView GetText Error: {ex.Message}");
-            LogCrash(ex);
+            LogDebug($"GetEditorText Exception: {ex.Message}");
         }
         return "";
     }
