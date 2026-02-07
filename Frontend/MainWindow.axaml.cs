@@ -140,7 +140,7 @@ public partial class MainWindow : Window
             } catch { }
         };
 
-        ClearBtn.Click += (s, e) => SetEditorText("");
+        ClearBtn.Click += (s, e) => ClearEditorText();
 
         ScriptList.SelectionChanged += async (s, e) => {
             try {
@@ -196,11 +196,20 @@ public partial class MainWindow : Window
     {
         try {
             if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                // Use the helper function defined in the HTML which has access to the editor instance
-                // We use EvaluateScript directly as it returns a Task<T> and handles the marshalling
-                return await webView.EvaluateScript<string>("GetText();");
+                // Access the browser and main frame to avoid execution isolation
+                var browser = webView.Browser;
+                if (browser != null) {
+                    var mainFrame = browser.GetMainFrame();
+                    if (mainFrame != null) {
+                        // Use the wrapper's EvaluateScript which should target the main frame
+                        // If isolation persists, we might need a more direct CefGlue call
+                        return await webView.EvaluateScript<string>("GetText();");
+                    }
+                }
             }
-        } catch { }
+        } catch (Exception ex) {
+            Console.WriteLine($"GetEditorText Error: {ex.Message}");
+        }
         return "";
     }
 
@@ -208,11 +217,36 @@ public partial class MainWindow : Window
     {
         try {
             if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                string escapedText = JsonSerializer.Serialize(text);
-                // Use the helper function defined in the HTML
-                webView.ExecuteScript($"SetText({escapedText});");
+                var browser = webView.Browser;
+                if (browser != null) {
+                    var mainFrame = browser.GetMainFrame();
+                    if (mainFrame != null) {
+                        string escapedText = JsonSerializer.Serialize(text);
+                        // Execute directly on the main frame
+                        mainFrame.ExecuteJavaScript($"SetText({escapedText});", mainFrame.Url, 0);
+                    }
+                }
             }
-        } catch { }
+        } catch (Exception ex) {
+            Console.WriteLine($"SetEditorText Error: {ex.Message}");
+        }
+    }
+
+    private void ClearEditorText()
+    {
+        try {
+            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
+                var browser = webView.Browser;
+                if (browser != null) {
+                    var mainFrame = browser.GetMainFrame();
+                    if (mainFrame != null) {
+                        mainFrame.ExecuteJavaScript("ClearText();", mainFrame.Url, 0);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Console.WriteLine($"ClearEditorText Error: {ex.Message}");
+        }
     }
 
     private void CreateNewTab(string title)
@@ -230,13 +264,18 @@ public partial class MainWindow : Window
             }
 
             webView.WebViewInitialized += () => {
-                if (!string.IsNullOrEmpty(cachedCompletionsJs)) {
-                    webView.ExecuteScript(cachedCompletionsJs);
-                }
-                if (!string.IsNullOrEmpty(cachedHighlightConfigJson)) {
-                    // Pass as a JSON string literal so LoadHighlighting can JSON.parse it
-                    string escapedJson = JsonSerializer.Serialize(cachedHighlightConfigJson);
-                    webView.ExecuteScript($"LoadHighlighting({escapedJson});");
+                var browser = webView.Browser;
+                if (browser != null) {
+                    var mainFrame = browser.GetMainFrame();
+                    if (mainFrame != null) {
+                        if (!string.IsNullOrEmpty(cachedCompletionsJs)) {
+                            mainFrame.ExecuteJavaScript(cachedCompletionsJs, mainFrame.Url, 0);
+                        }
+                        if (!string.IsNullOrEmpty(cachedHighlightConfigJson)) {
+                            string escapedJson = JsonSerializer.Serialize(cachedHighlightConfigJson);
+                            mainFrame.ExecuteJavaScript($"LoadHighlighting({escapedJson});", mainFrame.Url, 0);
+                        }
+                    }
                 }
             };
 
