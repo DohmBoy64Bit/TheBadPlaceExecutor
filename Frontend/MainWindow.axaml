@@ -39,6 +39,12 @@
             <Setter Property="Background" Value="Transparent"/>
         </Style>
         
+        <Style Selector="TabControl /template/ Border#PART_SelectedContentHost">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        
         <Style Selector="TabItem">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -51,6 +57,10 @@
         <Style Selector="TabItem:selected">
             <Setter Property="Background" Value="#1E1E1E"/>
             <Setter Property="Foreground" Value="White"/>
+        </Style>
+        
+        <Style Selector="TabItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
         </Style>
         
         <!-- TextEditor Styling for Dark Theme Consistency -->
@@ -109,7 +119,10 @@
 
                 <!-- Editor Container -->
                 <Border CornerRadius="4" Background="#1E1E1E" BorderBrush="#44FFFFFF" BorderThickness="1" ClipToBounds="True">
-                    <TabControl Name="EditorTabs" Background="Transparent" />
+                    <TabControl Name="EditorTabs" 
+                                Background="Transparent"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch" />
                 </Border>
 
                 <!-- Sidebar -->
