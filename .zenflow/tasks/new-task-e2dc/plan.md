@@ -52,7 +52,8 @@ Save to `{@artifacts_path}/plan.md`. If the feature is trivial and doesn't warra
 
 ---
 
-### [ ] Step: Setup and Dependencies
+### [x] Step: Setup and Dependencies
+<!-- chat-id: 377fe321-506b-4140-9597-ed5fe0126330 -->
 
 Add AvaloniaEdit package and create project structure for the new editor system.
 
