@@ -122,7 +122,8 @@ Add Lua syntax highlighting to the TextEditor instances.
 
 ---
 
-### [ ] Step: Implement Autocomplete System
+### [x] Step: Implement Autocomplete System
+<!-- chat-id: 88f00d8e-138c-4378-a2e4-9ea638a57d2c -->
 
 Create custom autocomplete functionality integrated with ApiParser.
 
