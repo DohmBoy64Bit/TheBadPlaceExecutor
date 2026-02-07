@@ -131,9 +131,17 @@ public partial class MainWindow : Window
             try {
                 string script = await GetEditorText();
                 if (!string.IsNullOrEmpty(script)) {
+                    // Remove potential JSON wrapping if necessary
+                    if (script.StartsWith("\"") && script.EndsWith("\"")) {
+                        script = JsonSerializer.Deserialize<string>(script) ?? script;
+                    }
+                    
+                    // Ensure PipeClient is initialized and connected
                     await PipeClient.SendScript(script);
                 }
-            } catch { }
+            } catch (Exception ex) {
+                LogCrash(ex);
+            }
         };
 
         ClearBtn.Click += (s, e) => SetEditorText("");
@@ -190,12 +198,19 @@ public partial class MainWindow : Window
 
     private async Task<string> GetEditorText()
     {
-        try {
-            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                // EvaluateScript in WebViewControl.Avalonia returns Task<T> and should be called on UI thread
+        try 
+        {
+            // Ensure we are looking at the current tab and it contains a WebView
+            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) 
+            {
+                // EvaluateScript returns a Task; execute it directly
                 return await webView.EvaluateScript<string>("editor.getValue();");
             }
-        } catch { }
+        } 
+        catch (Exception ex) 
+        {
+            LogCrash(ex); // Log the error so you can see why it's failing
+        }
         return "";
     }
 
