@@ -9,11 +9,10 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Reflection;
 using Frontend.IPC;
 using Frontend.Utils;
 using Frontend.Scripting;
-using Avalonia.WebView;
+using Frontend.Editors;
 
 namespace Frontend;
 
@@ -23,20 +22,32 @@ public partial class MainWindow : Window
     private string? cachedCompletionsJs;
     private string? cachedHighlightConfigJson;
     private DispatcherTimer? statusTimer;
+    private ScriptEditorManager? editorManager;
 
     public MainWindow()
     {
+        InitializeComponent();
+        
         try {
-            InitializeComponent();
             EnvironmentUtils.InitializeFolders();
             InitializeAutocomplete();
+            
+            if (EditorTabs == null)
+            {
+                File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TheBadPlace", "crash_main.log"), "EditorTabs is null!");
+                return;
+            }
+            
+            editorManager = new ScriptEditorManager(EditorTabs);
+            editorManager.LoadCompletions(apiParser);
+            
             SetupEvents();
             LoadScripts();
             SetupFileSystemWatcher();
             SetupStatusTimer();
             
             // Initial Tab
-            CreateNewTab("Script 1");
+            editorManager.CreateNewTab("Script 1");
         } catch (Exception ex) {
             LogCrash(ex);
         }
@@ -130,16 +141,16 @@ public partial class MainWindow : Window
     {
         ExecuteBtn.Click += async (s, e) => {
             try {
-                string script = await GetEditorText();
+                string script = editorManager?.GetEditorText() ?? "";
                 if (!string.IsNullOrEmpty(script)) {
                     await PipeClient.SendScript(script);
                 }
             } catch { }
         };
 
-        ClearBtn.Click += (s, e) => ClearEditorText();
+        ClearBtn.Click += (s, e) => editorManager?.SetEditorText("");
 
-        ScriptList.SelectionChanged += async (s, e) => {
+        ScriptList.SelectionChanged += (s, e) => {
             try {
                 if (ScriptList.SelectedItem != null) {
                     string fileName = ScriptList.SelectedItem.ToString() ?? "";
@@ -148,14 +159,14 @@ public partial class MainWindow : Window
                         string content = File.ReadAllText(filePath);
                         if (EditorTabs.SelectedItem is TabItem selectedTab) {
                             selectedTab.Header = fileName;
-                            SetEditorText(content);
+                            editorManager?.SetEditorText(content);
                         }
                     }
                 }
             } catch { }
         };
 
-        OptionsBtn.Click += (s, e) => CreateNewTab("Script " + (EditorTabs.Items.Count + 1));
+        OptionsBtn.Click += (s, e) => editorManager?.CreateNewTab("Script " + (EditorTabs.Items.Count + 1));
 
         OpenFileBtn.Click += async (s, e) => {
             try {
@@ -166,7 +177,7 @@ public partial class MainWindow : Window
                 var result = await dialog.ShowAsync(this);
                 if (result != null && result.Length > 0) {
                     string content = File.ReadAllText(result[0]);
-                    SetEditorText(content);
+                    editorManager?.SetEditorText(content);
                 }
             } catch { }
         };
@@ -179,86 +190,11 @@ public partial class MainWindow : Window
                 
                 var result = await dialog.ShowAsync(this);
                 if (result != null) {
-                    string content = await GetEditorText();
+                    string content = editorManager?.GetEditorText() ?? "";
                     File.WriteAllText(result, content);
                 }
             } catch { }
         };
     }
 
-    private async Task<string> GetEditorText()
-    {
-        try {
-            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is Avalonia.WebView.WebView webView) {
-                var result = await webView.ExecuteScriptAsync("GetText();");
-                if (result != null) {
-                    // result is a JSON string, need to deserialize it
-                    try {
-                        return JsonSerializer.Deserialize<string>(result) ?? result;
-                    } catch {
-                        return result.Trim('"');
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Console.WriteLine($"GetEditorText Error: {ex.Message}");
-        }
-        return "";
-    }
-
-    private async void SetEditorText(string text)
-    {
-        try {
-            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is Avalonia.WebView.WebView webView) {
-                string escapedText = JsonSerializer.Serialize(text);
-                await webView.ExecuteScriptAsync($"SetText({escapedText});");
-            }
-        } catch (Exception ex) {
-            Console.WriteLine($"SetEditorText Error: {ex.Message}");
-        }
-    }
-
-    private async void ClearEditorText()
-    {
-        try {
-            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is Avalonia.WebView.WebView webView) {
-                await webView.ExecuteScriptAsync("ClearText();");
-            }
-        } catch (Exception ex) {
-            Console.WriteLine($"ClearEditorText Error: {ex.Message}");
-        }
-    }
-
-    private void CreateNewTab(string title)
-    {
-        try {
-            var webView = new Avalonia.WebView.WebView();
-            var tabItem = new TabItem {
-                Header = title,
-                Content = webView
-            };
-
-            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Editor", "SynMonaco", "EditorPolytoria.html");
-            if (File.Exists(htmlPath)) {
-                webView.Source = new Uri("file:///" + htmlPath.Replace("\\", "/"));
-            }
-
-            webView.NavigationCompleted += async (s, e) => {
-                if (e.IsSuccess) {
-                    if (!string.IsNullOrEmpty(cachedCompletionsJs)) {
-                        await webView.ExecuteScriptAsync(cachedCompletionsJs);
-                    }
-                    if (!string.IsNullOrEmpty(cachedHighlightConfigJson)) {
-                        string escapedJson = JsonSerializer.Serialize(cachedHighlightConfigJson);
-                        await webView.ExecuteScriptAsync($"LoadHighlighting({escapedJson});");
-                    }
-                }
-            };
-
-            EditorTabs.Items.Add(tabItem);
-            EditorTabs.SelectedItem = tabItem;
-        } catch (Exception ex) {
-            LogCrash(ex);
-        }
-    }
 }

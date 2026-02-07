@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="Lua" extensions=".lua" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  
+  <Color name="Comment" foreground="#6A9955" />
+  <Color name="String" foreground="#CE9178" />
+  <Color name="Keyword" foreground="#569CD6" fontWeight="bold" />
+  <Color name="Number" foreground="#B5CEA8" />
+  <Color name="Function" foreground="#DCDCAA" />
+  <Color name="Operator" foreground="#D4D4D4" />
+  
+  <RuleSet ignoreCase="false">
+    
+    <Span color="Comment" begin="--\[\[" end="\]\]" multiline="true" />
+    <Span color="Comment" begin="--" />
+    
+    <Span color="String" multiline="true">
+      <Begin>\[\[</Begin>
+      <End>\]\]</End>
+    </Span>
+    
+    <Span color="String" ruleSet="StringEscape">
+      <Begin>"</Begin>
+      <End>"</End>
+    </Span>
+    
+    <Span color="String" ruleSet="StringEscape">
+      <Begin>'</Begin>
+      <End>'</End>
+    </Span>
+    
+    <Keywords color="Keyword">
+      <Word>and</Word>
+      <Word>break</Word>
+      <Word>do</Word>
+      <Word>else</Word>
+      <Word>elseif</Word>
+      <Word>end</Word>
+      <Word>false</Word>
+      <Word>for</Word>
+      <Word>function</Word>
+      <Word>if</Word>
+      <Word>in</Word>
+      <Word>local</Word>
+      <Word>nil</Word>
+      <Word>not</Word>
+      <Word>or</Word>
+      <Word>repeat</Word>
+      <Word>return</Word>
+      <Word>then</Word>
+      <Word>true</Word>
+      <Word>until</Word>
+      <Word>while</Word>
+    </Keywords>
+    
+    <Keywords color="Function">
+      <Word>assert</Word>
+      <Word>collectgarbage</Word>
+      <Word>dofile</Word>
+      <Word>error</Word>
+      <Word>getfenv</Word>
+      <Word>getmetatable</Word>
+      <Word>ipairs</Word>
+      <Word>load</Word>
+      <Word>loadfile</Word>
+      <Word>loadstring</Word>
+      <Word>next</Word>
+      <Word>pairs</Word>
+      <Word>pcall</Word>
+      <Word>print</Word>
+      <Word>rawequal</Word>
+      <Word>rawget</Word>
+      <Word>rawset</Word>
+      <Word>require</Word>
+      <Word>select</Word>
+      <Word>setfenv</Word>
+      <Word>setmetatable</Word>
+      <Word>tonumber</Word>
+      <Word>tostring</Word>
+      <Word>type</Word>
+      <Word>unpack</Word>
+      <Word>warn</Word>
+      <Word>xpcall</Word>
+      <Word>_G</Word>
+      <Word>_VERSION</Word>
+    </Keywords>
+    
+    <Rule color="Number">
+      \b0[xX][0-9a-fA-F]+|\b\d+(\.\d+)?([eE][+-]?\d+)?
+    </Rule>
+    
+    <Rule color="Operator">
+      [+\-*/^%#=~&lt;&gt;]
+    </Rule>
+    
+  </RuleSet>
+  
+  <RuleSet name="StringEscape">
+    <Span begin="\\" end="." />
+  </RuleSet>
+  
+</SyntaxDefinition>

@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:wv="clr-namespace:Avalonia.WebView;assembly=WebView.Avalonia"
+        xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Frontend.MainWindow"
         Title="The Bad Place Executor"
@@ -35,11 +35,42 @@
         </Style>
         
         <!-- Tab Control Modernization -->
+        <Style Selector="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        
+        <Style Selector="TabControl /template/ Border#PART_SelectedContentHost">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        
         <Style Selector="TabItem">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="MinHeight" Value="30"/>
             <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+        </Style>
+        
+        <Style Selector="TabItem:selected">
+            <Setter Property="Background" Value="#1E1E1E"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        
+        <Style Selector="TabItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        
+        <!-- TextEditor Styling for Dark Theme Consistency -->
+        <Style Selector="avaloniaEdit|TextEditor">
+            <Setter Property="Background" Value="#1E1E1E"/>
+            <Setter Property="Foreground" Value="#DCDCDC"/>
+            <Setter Property="FontFamily" Value="Consolas,Cascadia Code,Courier New"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="LineNumbersForeground" Value="#858585"/>
+            <Setter Property="ShowLineNumbers" Value="True"/>
         </Style>
     </Window.Styles>
 
@@ -88,15 +119,10 @@
 
                 <!-- Editor Container -->
                 <Border CornerRadius="4" Background="#1E1E1E" BorderBrush="#44FFFFFF" BorderThickness="1" ClipToBounds="True">
-                    <TabControl Name="EditorTabs" Background="Transparent" x:CompileBindings="False">
-                        <TabControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding Header}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </TabControl.ItemTemplate>
-                    </TabControl>
+                    <TabControl Name="EditorTabs" 
+                                Background="Transparent"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch" />
                 </Border>
 
                 <!-- Sidebar -->

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <EmbeddedResource Include="Resources\SyntaxHighlighting\*.xshd" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,13 +23,10 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />
     <PackageReference Include="Avalonia.Diagnostics" Version="11.0.10" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10" />
-    <PackageReference Include="WebView.Avalonia.Desktop" Version="11.0.0" />
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.4.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Editor\SynMonaco\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="ReflectionData.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
