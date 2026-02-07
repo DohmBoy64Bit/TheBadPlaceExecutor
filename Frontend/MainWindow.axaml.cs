@@ -13,8 +13,7 @@ using System.Reflection;
 using Frontend.IPC;
 using Frontend.Utils;
 using Frontend.Scripting;
-using WebViewControl;
-using Xilium.CefGlue;
+using Avalonia.WebView;
 
 namespace Frontend;
 
@@ -24,29 +23,6 @@ public partial class MainWindow : Window
     private string? cachedCompletionsJs;
     private string? cachedHighlightConfigJson;
     private DispatcherTimer? statusTimer;
-
-    // Helper to access internal chromium browser via reflection since 'Browser' is internal
-    private CefBrowser? GetCefBrowser(WebView webView)
-    {
-        try
-        {
-            var field = typeof(WebView).GetField("chromium", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (field != null)
-            {
-                var chromium = field.GetValue(webView);
-                if (chromium != null)
-                {
-                    var property = chromium.GetType().GetProperty("UnderlyingBrowser", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (property != null)
-                    {
-                        return property.GetValue(chromium) as CefBrowser;
-                    }
-                }
-            }
-        }
-        catch { }
-        return null;
-    }
 
     public MainWindow()
     {
@@ -156,9 +132,6 @@ public partial class MainWindow : Window
             try {
                 string script = await GetEditorText();
                 if (!string.IsNullOrEmpty(script)) {
-                    if (script.StartsWith("\"") && script.EndsWith("\"")) {
-                        script = JsonSerializer.Deserialize<string>(script) ?? script;
-                    }
                     await PipeClient.SendScript(script);
                 }
             } catch { }
@@ -207,9 +180,6 @@ public partial class MainWindow : Window
                 var result = await dialog.ShowAsync(this);
                 if (result != null) {
                     string content = await GetEditorText();
-                    if (content.StartsWith("\"") && content.EndsWith("\"")) {
-                        content = JsonSerializer.Deserialize<string>(content) ?? content;
-                    }
                     File.WriteAllText(result, content);
                 }
             } catch { }
@@ -219,13 +189,14 @@ public partial class MainWindow : Window
     private async Task<string> GetEditorText()
     {
         try {
-            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                // Access the browser and main frame to avoid execution isolation
-                var browser = GetCefBrowser(webView);
-                if (browser != null) {
-                    var mainFrame = browser.GetMainFrame();
-                    if (mainFrame != null) {
-                        return await webView.EvaluateScript<string>("GetText();");
+            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is Avalonia.WebView.WebView webView) {
+                var result = await webView.ExecuteScriptAsync("GetText();");
+                if (result != null) {
+                    // result is a JSON string, need to deserialize it
+                    try {
+                        return JsonSerializer.Deserialize<string>(result) ?? result;
+                    } catch {
+                        return result.Trim('"');
                     }
                 }
             }
@@ -235,36 +206,23 @@ public partial class MainWindow : Window
         return "";
     }
 
-    private void SetEditorText(string text)
+    private async void SetEditorText(string text)
     {
         try {
-            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                var browser = GetCefBrowser(webView);
-                if (browser != null) {
-                    var mainFrame = browser.GetMainFrame();
-                    if (mainFrame != null) {
-                        string escapedText = JsonSerializer.Serialize(text);
-                        // Execute directly on the main frame
-                        mainFrame.ExecuteJavaScript($"SetText({escapedText});", mainFrame.Url, 0);
-                    }
-                }
+            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is Avalonia.WebView.WebView webView) {
+                string escapedText = JsonSerializer.Serialize(text);
+                await webView.ExecuteScriptAsync($"SetText({escapedText});");
             }
         } catch (Exception ex) {
             Console.WriteLine($"SetEditorText Error: {ex.Message}");
         }
     }
 
-    private void ClearEditorText()
+    private async void ClearEditorText()
     {
         try {
-            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                var browser = GetCefBrowser(webView);
-                if (browser != null) {
-                    var mainFrame = browser.GetMainFrame();
-                    if (mainFrame != null) {
-                        mainFrame.ExecuteJavaScript("ClearText();", mainFrame.Url, 0);
-                    }
-                }
+            if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is Avalonia.WebView.WebView webView) {
+                await webView.ExecuteScriptAsync("ClearText();");
             }
         } catch (Exception ex) {
             Console.WriteLine($"ClearEditorText Error: {ex.Message}");
@@ -274,7 +232,7 @@ public partial class MainWindow : Window
     private void CreateNewTab(string title)
     {
         try {
-            var webView = new WebView();
+            var webView = new Avalonia.WebView.WebView();
             var tabItem = new TabItem {
                 Header = title,
                 Content = webView
@@ -282,21 +240,17 @@ public partial class MainWindow : Window
 
             string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Editor", "SynMonaco", "EditorPolytoria.html");
             if (File.Exists(htmlPath)) {
-                webView.LoadUrl("file:///" + htmlPath.Replace("\\", "/"));
+                webView.Source = new Uri("file:///" + htmlPath.Replace("\\", "/"));
             }
 
-            webView.WebViewInitialized += () => {
-                var browser = GetCefBrowser(webView);
-                if (browser != null) {
-                    var mainFrame = browser.GetMainFrame();
-                    if (mainFrame != null) {
-                        if (!string.IsNullOrEmpty(cachedCompletionsJs)) {
-                            mainFrame.ExecuteJavaScript(cachedCompletionsJs, mainFrame.Url, 0);
-                        }
-                        if (!string.IsNullOrEmpty(cachedHighlightConfigJson)) {
-                            string escapedJson = JsonSerializer.Serialize(cachedHighlightConfigJson);
-                            mainFrame.ExecuteJavaScript($"LoadHighlighting({escapedJson});", mainFrame.Url, 0);
-                        }
+            webView.NavigationCompleted += async (s, e) => {
+                if (e.IsSuccess) {
+                    if (!string.IsNullOrEmpty(cachedCompletionsJs)) {
+                        await webView.ExecuteScriptAsync(cachedCompletionsJs);
+                    }
+                    if (!string.IsNullOrEmpty(cachedHighlightConfigJson)) {
+                        string escapedJson = JsonSerializer.Serialize(cachedHighlightConfigJson);
+                        await webView.ExecuteScriptAsync($"LoadHighlighting({escapedJson});");
                     }
                 }
             };
