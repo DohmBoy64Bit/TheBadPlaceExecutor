@@ -139,5 +139,5 @@ Implement automatic script execution on startup.
 
 Verification: Scripts placed in `AutoExec` run automatically when the mod initializes in-game.
 
-### [ ] Step: push to github
+### [x] Step: push to github
 <!-- chat-id: 4e59ddaa-e11b-40ea-a488-d3ad141f48b1 -->
