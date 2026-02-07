@@ -99,7 +99,8 @@ Implement the core ScriptEditorManager class with tab management and text operat
 
 ---
 
-### [ ] Step: Implement Lua Syntax Highlighting
+### [x] Step: Implement Lua Syntax Highlighting
+<!-- chat-id: 897b738d-efe9-4cb7-9bbe-ab48cf0332e7 -->
 
 Add Lua syntax highlighting to the TextEditor instances.
 
