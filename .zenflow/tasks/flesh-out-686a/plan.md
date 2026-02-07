@@ -131,9 +131,13 @@ Enhance the UI with multi-tab support and connection status.
 Verification: Can open multiple tabs and switch between them. Status indicator updates based on connection success.
 
 ### [x] Step: Core Backend - AutoExec Implementation
+<!-- chat-id: 8c720471-95ad-4265-ab71-3ee85f90c9e8 -->
 Implement automatic script execution on startup.
 
 1. Backend should scan `%AppData%\TheBadPlace\AutoExec` on initialization.
 2. Execute all `.lua` and `.txt` files found in that folder using the captured script instance.
 
 Verification: Scripts placed in `AutoExec` run automatically when the mod initializes in-game.
+
+### [ ] Step: push to github
+<!-- chat-id: 4e59ddaa-e11b-40ea-a488-d3ad141f48b1 -->

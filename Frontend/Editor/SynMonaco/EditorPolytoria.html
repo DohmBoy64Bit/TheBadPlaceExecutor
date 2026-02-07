@@ -173,14 +173,10 @@
 
         // Functions callable from C#
         GetText = function() {
-            console.log("GetText called from host");
-            var val = editor.getValue();
-            console.log("Returning " + (val ? val.length : 0) + " characters");
-            return val;
+            return editor.getValue();
         }
 
         SetText = function(x) {
-          console.log("SetText called with " + (x ? x.length : 0) + " characters");
           editor.setValue(x);
           editor.session.setValue(x);
           editor.clearSelection();

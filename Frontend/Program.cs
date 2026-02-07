@@ -18,12 +18,8 @@ class Program
         }
         catch (Exception ex)
         {
-            string logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TheBadPlace");
-            Directory.CreateDirectory(logDir);
-            string debugPath = Path.Combine(logDir, "debug.log");
-            File.AppendAllText(debugPath, $"[CRITICAL ERROR] {DateTime.Now}: {ex}{Environment.NewLine}");
-            
-            string logPath = Path.Combine(logDir, "crash.log");
+            string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TheBadPlace", "crash.log");
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
             File.WriteAllText(logPath, ex.ToString());
         }
     }
