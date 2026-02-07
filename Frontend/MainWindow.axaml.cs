@@ -13,6 +13,7 @@ using Frontend.IPC;
 using Frontend.Utils;
 using Frontend.Scripting;
 using WebViewControl;
+using Xilium.CefGlue;
 
 namespace Frontend;
 
@@ -195,7 +196,9 @@ public partial class MainWindow : Window
     {
         try {
             if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
-                return await Task.Run(() => webView.EvaluateScript<string>("editor.getValue();"));
+                // Use the helper function defined in the HTML which has access to the editor instance
+                // We use EvaluateScript directly as it returns a Task<T> and handles the marshalling
+                return await webView.EvaluateScript<string>("GetText();");
             }
         } catch { }
         return "";
@@ -206,7 +209,8 @@ public partial class MainWindow : Window
         try {
             if (EditorTabs.SelectedItem is TabItem selectedTab && selectedTab.Content is WebView webView) {
                 string escapedText = JsonSerializer.Serialize(text);
-                webView.ExecuteScript($"editor.setValue({escapedText});");
+                // Use the helper function defined in the HTML
+                webView.ExecuteScript($"SetText({escapedText});");
             }
         } catch { }
     }
@@ -230,7 +234,9 @@ public partial class MainWindow : Window
                     webView.ExecuteScript(cachedCompletionsJs);
                 }
                 if (!string.IsNullOrEmpty(cachedHighlightConfigJson)) {
-                    webView.ExecuteScript($"setHighlightingConfig({cachedHighlightConfigJson});");
+                    // Pass as a JSON string literal so LoadHighlighting can JSON.parse it
+                    string escapedJson = JsonSerializer.Serialize(cachedHighlightConfigJson);
+                    webView.ExecuteScript($"LoadHighlighting({escapedJson});");
                 }
             };
 

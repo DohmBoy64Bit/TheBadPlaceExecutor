@@ -141,3 +141,30 @@ Verification: Scripts placed in `AutoExec` run automatically when the mod initia
 
 ### [x] Step: push to github
 <!-- chat-id: 4e59ddaa-e11b-40ea-a488-d3ad141f48b1 -->
+
+### [x] Step: fix bug where execute button does not work
+<!-- chat-id: 71c1ec48-0701-4835-a875-633374e1dc40 -->
+
+To use page frames in the OutSystems/WebView control (which wraps CefGlue for Avalonia/WPF), you don't need to "enable" them per se—they're part of the underlying CEF architecture and are always available. The key is to access the main frame (or a specific frame) via the control's API to ensure JavaScript execution happens in the page's V8 context rather than an isolated one. This gives you access to page-level variables like editor.
+Based on the wrapper's design (which provides a simplified API around CefGlue), here's how to do it. The control exposes a Browser property (of type CefBrowser) that lets you target frames. Use frame-specific methods for JS execution and evaluation to avoid isolation.
+Prerequisites
+
+Ensure your project references the OutSystems.WebView NuGet package (or builds from source).
+Your WebView control is initialized and loaded (e.g., after IsBrowserInitializedChanged or NavigationCompleted events).
+
+Step 1: Access the Browser and Main Frame
+In your code-behind (e.g., MainWindow.axaml.cs):
+C#using OutSystems.WebView; // Or the namespace from the package
+using Xilium.CefGlue; // For CefBrowser, CefFrame, etc.
+
+// Assume 'myWebView' is your WebView control instance from XAML
+var browser = myWebView.Browser; // Public property exposing the underlying CefBrowser
+if (browser != null)
+{
+    var mainFrame = browser.GetMainFrame(); // Gets the root frame (page context)
+    // Now use mainFrame for JS ops
+}
+If the Browser property isn't directly public in your version (check the source or intellisense), it may be accessible via reflection or an internal getter— but the wrapper is designed to expose it for advanced use. The sample project in the repo (samples/SampleWebView.Avalonia) demonstrates browser access.
+Step 2: Execute JS Without Return Value (Simple Execution)
+Use ExecuteJavaScript on the frame for fire-and-forget scripts (runs in page context):
+C#string script = "console.log('Hello from C#!');"; // Or your injection code for autocomplete/syntax
