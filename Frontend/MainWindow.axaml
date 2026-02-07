@@ -35,11 +35,22 @@
         </Style>
         
         <!-- Tab Control Modernization -->
+        <Style Selector="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        
         <Style Selector="TabItem">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="MinHeight" Value="30"/>
             <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+        </Style>
+        
+        <Style Selector="TabItem:selected">
+            <Setter Property="Background" Value="#1E1E1E"/>
+            <Setter Property="Foreground" Value="White"/>
         </Style>
         
         <!-- TextEditor Styling for Dark Theme Consistency -->
