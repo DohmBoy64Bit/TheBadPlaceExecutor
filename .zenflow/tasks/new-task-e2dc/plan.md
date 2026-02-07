@@ -184,6 +184,7 @@ Replace WebView usage in MainWindow with ScriptEditorManager.
 ---
 
 ### [ ] Step: Remove WebView Dependencies
+<!-- chat-id: 115f344b-05b9-4550-9cd1-5d25885a44c4 -->
 
 Clean up WebView and Ace Editor artifacts.
 
